@@ -1,0 +1,103 @@
+/* ==========================================================================
+   KANDOTECH — admin console styles (extends css/style.css tokens)
+   ========================================================================== */
+
+.admin-body{ background:var(--canvas); }
+.dim{ color:var(--text-dim); }
+.error-text{ color:var(--danger); font-size:.85rem; min-height:1.2em; margin:12px 0 0; }
+
+/* ---------- login ---------- */
+.login-screen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  background:radial-gradient(ellipse 700px 500px at 50% 0%, rgba(139,92,246,.16), transparent 60%), var(--canvas);
+}
+.login-card{
+  width:100%; max-width:360px; background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:34px 30px; text-align:center; box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+}
+.login-card h1{ font-size:1.4rem; margin-bottom:4px; }
+.login-card .field{ text-align:left; margin-top:20px; }
+
+/* ---------- topbar ---------- */
+.admin-topbar{ background:var(--panel); border-bottom:1px solid var(--border-soft); position:sticky; top:0; z-index:40; }
+.admin-topbar-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 24px; max-width:1280px; margin:0 auto; gap:16px; }
+.save-status{ font-family:var(--font-mono); font-size:.76rem; color:var(--text-faint); }
+.save-status.saving{ color:var(--amber); }
+.save-status.error{ color:var(--danger); }
+
+/* ---------- publish bar ---------- */
+.publish-bar{ background:var(--canvas-alt); border-bottom:1px solid var(--border-soft); }
+.publish-bar-inner{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px; flex-wrap:wrap; }
+.publish-bar.dirty #publishHeadline{ color:var(--amber); }
+
+/* ---------- layout ---------- */
+.admin-main{ padding:32px 24px 80px; }
+.tabs{ display:flex; gap:6px; margin-bottom:24px; border-bottom:1px solid var(--border-soft); }
+.tab{
+  background:none; border:none; color:var(--text-dim); padding:10px 18px; font-size:.9rem; font-weight:600;
+  cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color .15s, border-color .15s;
+}
+.tab:hover{ color:var(--text); }
+.tab.active{ color:var(--text); border-color:var(--violet); }
+.tab-panel[hidden]{ display:none; }
+
+.panel-head{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+.admin-search{
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px;
+  color:var(--text); font-size:.88rem; width:260px; max-width:100%;
+}
+
+/* ---------- product table ---------- */
+.product-table{ display:flex; flex-direction:column; gap:12px; }
+.product-row{
+  background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px;
+  display:grid; grid-template-columns:72px 1.6fr 1fr .8fr .8fr auto; gap:14px; align-items:start;
+}
+.product-row .thumb{
+  width:72px; height:72px; border-radius:10px; background:var(--surface); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; position:relative; flex-shrink:0;
+}
+.product-row .thumb img{ max-width:100%; max-height:100%; object-fit:contain; }
+.product-row .thumb .pico{ width:28px; height:28px; }
+.product-row .thumb::after{
+  content:"Change"; position:absolute; inset:auto 0 0 0; background:rgba(10,12,23,.85); color:var(--text);
+  font-size:.62rem; text-align:center; padding:3px 0; opacity:0; transition:opacity .15s;
+}
+.product-row .thumb:hover::after{ opacity:1; }
+.product-row input[type="file"]{ display:none; }
+
+.field-stack{ display:flex; flex-direction:column; gap:8px; }
+.field-stack label{ font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); }
+.field-stack .field-note{ font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); margin-top:4px; }
+.product-row input, .product-row select, .product-row textarea{
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 10px;
+  color:var(--text); font-family:inherit; font-size:.86rem; width:100%;
+}
+.product-row textarea{ resize:vertical; min-height:38px; }
+.product-row .sku-tag{ font-family:var(--font-mono); font-size:.72rem; color:var(--text-faint); margin-top:4px; display:block; }
+.row-actions{ display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+.icon-danger{
+  background:var(--surface); border:1px solid var(--border); color:var(--text-faint); width:34px; height:34px;
+  border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s;
+}
+.icon-danger:hover{ border-color:var(--danger); color:var(--danger); }
+.stock-pill{ font-family:var(--font-mono); font-size:.68rem; padding:3px 8px; border-radius:6px; background:var(--surface); border:1px solid var(--border); color:var(--cyan); }
+.stock-pill.zero{ color:var(--danger); }
+
+@media (max-width:900px){
+  .product-row{ grid-template-columns:1fr; }
+  .product-row .thumb{ width:100%; height:140px; }
+  .row-actions{ flex-direction:row; align-items:center; justify-content:flex-end; }
+}
+
+/* ---------- simple table (categories/services) ---------- */
+.simple-table{ display:flex; flex-direction:column; gap:10px; }
+.simple-row{
+  background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+  display:grid; grid-template-columns:1fr 1fr 2fr auto; gap:12px; align-items:center;
+}
+.simple-row input, .simple-row textarea{
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 10px;
+  color:var(--text); font-family:inherit; font-size:.86rem; width:100%;
+}
+@media (max-width:800px){ .simple-row{ grid-template-columns:1fr; } }

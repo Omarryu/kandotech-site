@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Kandotech Computer Systems Services</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 3v6M8 6l4-3 4 3" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="10" width="14" height="9" rx="2"/></svg></span>
+      <span class="brand-name">Kando<em>tech</em></span>
+    </a>
+    <nav class="nav" id="mainNav">
+      <a href="index.html#catalog">Catalog</a>
+      <a href="index.html#services">Services</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-outline btn-sm" href="index.html#catalog">← Continue shopping</a>
+    </div>
+  </div>
+</header>
+
+<div class="page-hero">
+  <div class="container">
+    <h1>Checkout</h1>
+    <p>Review your order, add your details, then pay securely by card.</p>
+    <div class="steps">
+      <div class="step active"><b>1</b> Your details</div>
+      <div class="step active"><b>2</b> Review order</div>
+      <div class="step"><b>3</b> Pay by card</div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="container checkout-grid">
+    <div>
+      <h2 style="font-size:1.2rem;">Contact &amp; delivery</h2>
+      <form id="checkoutForm">
+        <div class="field">
+          <label for="fullName">Full name</label>
+          <input id="fullName" type="text" required>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" required>
+        </div>
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input id="phone" type="tel" required>
+        </div>
+        <div class="field">
+          <label for="fulfil">Fulfilment</label>
+          <select id="fulfil">
+            <option value="pickup">Pick up in Old Harbour</option>
+            <option value="delivery">Island-wide delivery</option>
+          </select>
+        </div>
+        <div class="field" id="addressField">
+          <label for="address">Delivery address</label>
+          <textarea id="address" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label for="notes">Order notes (optional)</label>
+          <textarea id="notes" rows="2"></textarea>
+        </div>
+      </form>
+
+      <h2 style="font-size:1.2rem; margin-top:34px;">Order items</h2>
+      <div id="checkoutItems" style="display:flex; flex-direction:column; gap:14px;"></div>
+    </div>
+
+    <div class="summary-card">
+      <h3 style="font-size:1rem;">Order summary</h3>
+      <div class="summary-row"><span>Items (<span id="sumCount">0</span>)</span><span id="sumSubtotal">J$0</span></div>
+      <div class="summary-row"><span>Delivery</span><span id="sumDelivery">Calculated after order</span></div>
+      <div class="summary-row total"><span>Total</span><span id="sumTotal">J$0</span></div>
+
+      <div class="pay-tabs" id="payTabs" style="margin-top:20px;">
+        <button class="pay-tab active" data-method="card">Card</button>
+        <button class="pay-tab" data-method="paypal">PayPal</button>
+        <button class="pay-tab" data-method="lynk">Lynk</button>
+      </div>
+
+      <div class="pay-panel" data-method-panel="card">
+        <button class="btn btn-primary btn-block" id="payBtn" style="margin-top:14px;">Pay with card</button>
+      </div>
+
+      <div class="pay-panel" data-method-panel="paypal" hidden>
+        <p style="font-size:.8rem; color:var(--text-dim); margin:14px 0 10px;">
+          Charged in USD (converted from your JMD total) — PayPal doesn't support JMD checkout directly.
+        </p>
+        <div id="paypalButtonContainer"></div>
+      </div>
+
+      <div class="pay-panel" data-method-panel="lynk" hidden>
+        <div class="notice" style="margin-top:14px;">
+          <p style="margin:0 0 8px;"><strong>Pay <span id="lynkAmount">J$0</span> via Lynk:</strong></p>
+          <ol style="margin:0 0 10px; padding-left:18px; font-size:.85rem; color:var(--text-dim);">
+            <li>Open the Lynk app and send the amount above to <strong id="lynkIdDisplay">—</strong></li>
+            <li>Add your name and "<span id="lynkOrderNote">order</span>" as the payment note</li>
+            <li>Click the button below once you've sent it</li>
+          </ol>
+        </div>
+        <button class="btn btn-primary btn-block" id="lynkConfirmBtn">I've sent payment via Lynk</button>
+      </div>
+
+      <p id="payStatus" style="font-size:.82rem; color:var(--text-dim); margin-top:12px;"></p>
+
+      <div class="notice">
+        Payments are processed securely by Stripe. Card details never touch our server.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-bottom">
+    <span>© 2026 Kandotech Computer Systems Services. Old Harbour, St. Catherine, Jamaica.</span>
+    <span class="pin-strip small"><span></span><span></span><span></span></span>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/checkout-config.js"></script>
+<script src="js/checkout.js"></script>
+</body>
+</html>

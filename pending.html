@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order received — Kandotech Computer Systems Services</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 3v6M8 6l4-3 4 3" stroke-linecap="round" stroke-linejoin="round"/><rect x="5" y="10" width="14" height="9" rx="2"/></svg>
+      </span>
+      <span class="brand-name">Kando<em>tech</em></span>
+    </a>
+  </div>
+</header>
+
+<section>
+  <div class="container center" style="max-width:560px; padding-top:40px; padding-bottom:40px;">
+    <div class="pin-strip cool" style="justify-content:center; margin-bottom:22px;"><span></span><span></span><span></span><span></span><span></span></div>
+    <h1>Order received — awaiting payment confirmation</h1>
+    <p style="color:var(--text-dim);">
+      We've logged your order (<strong id="orderIdText" class="mono"></strong>) for
+      <strong id="orderAmountText"></strong>. Once we confirm your Lynk payment came
+      through, we'll reach out to arrange pickup or delivery.
+    </p>
+    <div class="notice" style="text-align:left; margin-top:20px;">
+      Didn't send the payment yet, or sent the wrong amount? Just reply to any message
+      from us, or use the contact page — reference your order number above.
+    </div>
+    <a class="btn btn-primary" href="index.html" style="margin-top:24px;">Back to home</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-bottom">
+    <span>© 2026 Kandotech Computer Systems Services. Old Harbour, St. Catherine, Jamaica.</span>
+  </div>
+</footer>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  document.getElementById("orderIdText").textContent = params.get("order") || "—";
+  document.getElementById("orderAmountText").textContent = params.get("amount") || "your order total";
+</script>
+</body>
+</html>
