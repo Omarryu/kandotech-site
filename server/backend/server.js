@@ -21,14 +21,41 @@ const fs = require("fs");
 const crypto = require("crypto");
 const multer = require("multer");
 
+// --------------------------------------------------------------------------
+// Never fail silently. Shared-hosting Node runners (like cPanel's Passenger-
+// based Node.js Selector) often show a blank page with no useful message if
+// the process crashes at startup — these two handlers make sure the real
+// cause always lands in the app's error log instead of just vanishing.
+// --------------------------------------------------------------------------
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION — the server hit an unexpected error:", err);
+});
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED PROMISE REJECTION:", err);
+});
+
 const app = express();
+app.set("trust proxy", 1); // correct req.protocol/host behind a reverse proxy (cPanel, Render, etc.)
+
 const ROOT = path.join(__dirname, "..", ".."); // the site root (index.html, css/, js/, assets/)
 const DATA_DIR = path.join(__dirname, "data");
 const LIVE_PATH = path.join(DATA_DIR, "live.json");
 const DRAFT_PATH = path.join(DATA_DIR, "draft.json");
 const UPLOAD_DIR = path.join(ROOT, "assets", "img", "uploads");
+const INDEX_HTML = path.join(ROOT, "index.html");
 
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+console.log("=== Kandotech server starting ===");
+console.log("Node version:", process.version);
+console.log("__dirname:", __dirname);
+console.log("Computed site ROOT:", ROOT);
+console.log("index.html found at ROOT?", fs.existsSync(INDEX_HTML));
+console.log("live.json found?", fs.existsSync(LIVE_PATH));
+
+try {
+  if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+} catch (err) {
+  console.error("Could not create upload directory (image uploads will fail until this is fixed):", err.message);
+}
 
 const PORT = process.env.PORT || 4242;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme";
@@ -36,6 +63,39 @@ const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(ROOT));
+
+// --------------------------------------------------------------------------
+// Diagnostics — open this URL in a browser to see exactly what the server
+// sees on disk, instead of guessing from a blank page. Not authenticated on
+// purpose (it reveals no secrets, only booleans/paths), but feel free to
+// delete this route once your deployment is confirmed working.
+// --------------------------------------------------------------------------
+app.get("/__diagnostics", (req, res) => {
+  let liveProductCount = null;
+  try {
+    liveProductCount = JSON.parse(fs.readFileSync(LIVE_PATH, "utf8")).products.length;
+  } catch (err) {
+    liveProductCount = `error reading live.json: ${err.message}`;
+  }
+  res.json({
+    nodeVersion: process.version,
+    dirname: __dirname,
+    computedRoot: ROOT,
+    indexHtmlExists: fs.existsSync(INDEX_HTML),
+    cssExists: fs.existsSync(path.join(ROOT, "css", "style.css")),
+    jsExists: fs.existsSync(path.join(ROOT, "js", "data.js")),
+    liveJsonExists: fs.existsSync(LIVE_PATH),
+    draftJsonExists: fs.existsSync(DRAFT_PATH),
+    liveProductCount,
+    uploadDirWritable: fs.existsSync(UPLOAD_DIR),
+    envConfigured: {
+      ADMIN_PASSWORD: ADMIN_PASSWORD !== "changeme",
+      STRIPE_SECRET_KEY: !!process.env.STRIPE_SECRET_KEY,
+      PAYPAL_CLIENT_ID: !!process.env.PAYPAL_CLIENT_ID,
+      LYNK_ID: !!process.env.LYNK_ID,
+    },
+  });
+});
 
 // --------------------------------------------------------------------------
 // tiny in-memory session store (fine for a single-admin small-business tool)
@@ -344,7 +404,11 @@ if (PAYPAL_ENABLED) {
 // --------------------------------------------------------------------------
 const LYNK_ENABLED = !!process.env.LYNK_ID;
 const ORDERS_PATH = path.join(DATA_DIR, "orders.json");
-if (!fs.existsSync(ORDERS_PATH)) writeJSON(ORDERS_PATH, []);
+try {
+  if (!fs.existsSync(ORDERS_PATH)) writeJSON(ORDERS_PATH, []);
+} catch (err) {
+  console.error("Could not initialize orders.json (Lynk orders will fail until this is fixed):", err.message);
+}
 
 app.post("/api/orders/lynk", (req, res) => {
   if (!LYNK_ENABLED) return res.status(500).json({ error: "Lynk is not configured on the server yet." });
@@ -387,10 +451,29 @@ app.get("/api/payment-config", (req, res) => {
 // --------------------------------------------------------------------------
 app.get("/admin", (req, res) => res.sendFile(path.join(ROOT, "admin.html")));
 
+// If we ever get here for a GET request, express.static didn't find a
+// matching file — most commonly because ROOT is pointed at the wrong
+// folder on this specific host. Show something actionable instead of a
+// blank page or a bare "Cannot GET /".
+app.get("*", (req, res) => {
+  res.status(404).send(`
+    <body style="font-family:sans-serif; max-width:640px; margin:60px auto; line-height:1.6;">
+      <h2>Kandotech server is running, but couldn't find "${req.path}"</h2>
+      <p>The server started fine, but it can't find your site's files at the folder it's currently
+      looking in: <code>${ROOT}</code></p>
+      <p>Visit <a href="/__diagnostics">/__diagnostics</a> for a full breakdown of what the server
+      can and can't see on disk — that will show exactly what's missing.</p>
+    </body>
+  `);
+});
+
 app.listen(PORT, () => {
   console.log(`Kandotech server running at http://localhost:${PORT}`);
   console.log(`Admin console at      http://localhost:${PORT}/admin`);
+  console.log(`Diagnostics at        http://localhost:${PORT}/__diagnostics`);
   if (ADMIN_PASSWORD === "changeme") {
     console.log("⚠  Set ADMIN_PASSWORD in server/backend/.env before deploying.");
   }
+}).on("error", (err) => {
+  console.error("SERVER FAILED TO START:", err.message);
 });
