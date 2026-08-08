@@ -101,3 +101,6 @@
   color:var(--text); font-family:inherit; font-size:.86rem; width:100%;
 }
 @media (max-width:800px){ .simple-row{ grid-template-columns:1fr; } }
+
+/* ---------- business info form ---------- */
+.business-form{ max-width:480px; display:flex; flex-direction:column; gap:4px; }

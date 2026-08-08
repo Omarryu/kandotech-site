@@ -95,6 +95,7 @@ async function loadAdminCatalog(){
   renderProducts();
   renderCategories();
   renderServices();
+  renderBusinessForm();
   updatePublishBar();
 }
 
@@ -157,6 +158,7 @@ function wirePublishBar(){
     renderProducts();
     renderCategories();
     renderServices();
+    renderBusinessForm();
     updatePublishBar();
     showAdminToast("Draft reverted to match the live site.");
   });
@@ -413,6 +415,36 @@ function renderServices(){
     btn.addEventListener("click", () => {
       draft.services = draft.services.filter(s => s.id !== btn.dataset.sdelete);
       renderServices();
+      scheduleSave();
+    });
+  });
+}
+
+/* ---------- business info ---------- */
+function renderBusinessForm(){
+  const el = document.getElementById("businessForm");
+  if(!el) return;
+  const b = draft.business || {};
+  const fields = [
+    { key: "name",    label: "Full business name",  type: "text" },
+    { key: "short",   label: "Short name (header logo)", type: "text" },
+    { key: "tagline", label: "Tagline", type: "text" },
+    { key: "address", label: "Address", type: "text" },
+    { key: "phone",   label: "Phone", type: "text" },
+    { key: "email",   label: "Email", type: "text" },
+    { key: "hours",   label: "Hours", type: "text" },
+  ];
+  el.innerHTML = fields.map(f => `
+    <div class="field">
+      <label for="biz-${f.key}">${f.label}</label>
+      <input id="biz-${f.key}" type="${f.type}" data-bfield="${f.key}" value="${escapeAttr(b[f.key] || "")}">
+    </div>
+  `).join("");
+
+  el.querySelectorAll("[data-bfield]").forEach(input => {
+    input.addEventListener("input", () => {
+      if(!draft.business) draft.business = {};
+      draft.business[input.dataset.bfield] = input.value;
       scheduleSave();
     });
   });

@@ -461,6 +461,7 @@
     "address": "Old Harbour, St. Catherine, Jamaica",
     "email": "hello@kandotech.com",
     "phone": "+1 (876) 555-0142",
-    "currency": "JMD"
+    "currency": "JMD",
+    "hours": "Monday \u2013 Saturday, 9:00am \u2013 5:00pm"
   }
 }

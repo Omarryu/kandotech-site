@@ -54,6 +54,23 @@ function renderAll(){
   renderFilterList();
   renderCatalog();
   renderServices();
+  renderBusinessInfo();
+}
+
+function renderBusinessInfo(){
+  const b = BUSINESS || {};
+  const set = (id, text) => { const el = document.getElementById(id); if(el && text) el.textContent = text; };
+
+  set("bizAddress", b.address);
+  set("bizPhone", b.phone);
+  set("bizEmail", b.email);
+  set("bizHours", b.hours);
+
+  const footer = document.getElementById("footerBizLine");
+  if(footer && b.name && b.address){
+    const year = new Date().getFullYear();
+    footer.textContent = `© ${year} ${b.name}. ${b.address}.`;
+  }
 }
 
 function showBackendError(){
