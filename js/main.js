@@ -448,8 +448,6 @@ function wireContactForm(){
 
 /* ---------- scroll reveal ---------- */
 function wireReveal(){
-  const items = document.querySelectorAll("[data-reveal]");
-  if(!items.length) return;
   const io = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if(entry.isIntersecting){
@@ -458,14 +456,26 @@ function wireReveal(){
       }
     });
   }, { threshold: 0.12 });
-  items.forEach(el => io.observe(el));
 
-  // catch elements rendered after initial observe (catalog re-renders)
-  const mo = new MutationObserver(() => {
+  function observeAll(){
     document.querySelectorAll("[data-reveal]:not(.in-view)").forEach(el => io.observe(el));
-  });
+  }
+  observeAll();
+
+  // catch elements rendered after the initial pass (catalog re-renders, filtering, live updates)
   const grid = document.getElementById("catalogGrid");
-  if(grid) mo.observe(grid, { childList: true });
+  if(grid){
+    const mo = new MutationObserver(observeAll);
+    mo.observe(grid, { childList: true });
+  }
+
+  // Safety net: content must never stay invisible indefinitely, even if the
+  // IntersectionObserver misses an element for some reason (zero-height
+  // container at observe-time, a browser quirk, a re-render race, etc.).
+  // This sweep just force-reveals anything still hidden after a beat.
+  setInterval(() => {
+    document.querySelectorAll("[data-reveal]:not(.in-view)").forEach(el => el.classList.add("in-view"));
+  }, 400);
 }
 
 /* ---------- animated hero counters ---------- */
