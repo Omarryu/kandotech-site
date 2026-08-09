@@ -34,7 +34,7 @@ function renderOrder(){
   }else{
     itemsEl.innerHTML = lines.map(l => `
       <div class="cart-row" style="border:1px solid var(--border); border-radius:12px; padding:14px; background:var(--panel);">
-        <div class="cart-thumb">${l.product.img ? `<img src="${l.product.img}" alt="">` : ICONS[l.product.icon] || ICONS.port}</div>
+        <div class="cart-thumb">${mediaThumbHTML(l.product)}</div>
         <div class="cart-row-info">
           <div class="name">${l.product.name}</div>
           <div class="price">${formatJMD(l.product.price)} × ${l.qty} = ${formatJMD(l.product.price * l.qty)}</div>

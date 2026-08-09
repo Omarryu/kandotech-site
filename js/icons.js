@@ -13,3 +13,23 @@ const ICONS = {
   scanner: `<svg class="pico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 14V8h8M40 14V8h-8M8 34v6h8M40 34v6h-8" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 24h20" stroke-width="3" stroke-linecap="round"/></svg>`,
   computer: `<svg class="pico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="10" width="36" height="22" rx="2"/><path d="M18 40h12M24 32v8" stroke-linecap="round"/></svg>`,
 };
+
+/* ==========================================================================
+   Shared product media helpers — products now carry a `media` array
+   ([{type:"image"|"video", url}, ...]) instead of a single `img` string,
+   so photos and short videos can both be attached per product.
+   ========================================================================== */
+
+function primaryMedia(product){
+  return (product.media && product.media.length) ? product.media[0] : null;
+}
+
+function mediaThumbHTML(product){
+  const m = primaryMedia(product);
+  if(!m) return ICONS[product.icon] || ICONS.port;
+  const alt = String(product.name || "").replace(/"/g, "&quot;");
+  if(m.type === "video"){
+    return `<video src="${m.url}" muted playsinline preload="metadata"></video>`;
+  }
+  return `<img src="${m.url}" alt="${alt}" loading="lazy">`;
+}

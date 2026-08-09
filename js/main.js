@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   applyCategoryFromQuery();
   renderAll();
   wireCartDrawer();
+  wireGalleryOverlay();
   wireNav();
   wireContactForm();
   wireSearchAndSort();
@@ -64,7 +65,20 @@ function renderBusinessInfo(){
   set("bizAddress", b.address);
   set("bizPhone", b.phone);
   set("bizEmail", b.email);
-  set("bizHours", b.hours);
+
+  const hoursList = document.getElementById("bizHoursList");
+  if(hoursList && b.hoursByDay){
+    const days = [
+      ["monday", "Monday"], ["tuesday", "Tuesday"], ["wednesday", "Wednesday"],
+      ["thursday", "Thursday"], ["friday", "Friday"], ["saturday", "Saturday"], ["sunday", "Sunday"],
+    ];
+    const todayKey = days[(new Date().getDay() + 6) % 7][0]; // getDay() is Sun-first; shift to Mon-first
+    hoursList.innerHTML = days.map(([key, label]) => {
+      const value = b.hoursByDay[key] || "Closed";
+      const isToday = key === todayKey;
+      return `<li class="${isToday ? "today" : ""}"><span>${label}</span><span>${value}</span></li>`;
+    }).join("");
+  }
 
   const footer = document.getElementById("footerBizLine");
   if(footer && b.name && b.address){
@@ -200,20 +214,89 @@ function renderCatalog(){
       setTimeout(() => btn.classList.remove("pulse"), 400);
     });
   });
+  grid.querySelectorAll("[data-gallery-open]").forEach(el => {
+    el.addEventListener("click", e => {
+      if(e.target.closest("[data-add]")) return; // don't trigger gallery when adding to cart
+      openGallery(el.dataset.galleryOpen);
+    });
+  });
 }
 
+/* ---------- media gallery lightbox ---------- */
+let galleryState = { media: [], index: 0 };
+
+function openGallery(sku){
+  const p = PRODUCTS.find(x => x.sku === sku);
+  if(!p || !p.media || !p.media.length) return;
+  galleryState = { media: p.media, index: 0 };
+  renderGallery();
+  document.getElementById("galleryOverlay").classList.add("open");
+}
+
+function renderGallery(){
+  const overlay = document.getElementById("galleryOverlay");
+  const { media, index } = galleryState;
+  const item = media[index];
+  const content = item.type === "video"
+    ? `<video src="${item.url}" controls autoplay class="gallery-media"></video>`
+    : `<img src="${item.url}" alt="" class="gallery-media">`;
+  overlay.innerHTML = `
+    <button class="gallery-close" aria-label="Close">&times;</button>
+    ${media.length > 1 ? `<button class="gallery-nav prev" aria-label="Previous">&#10094;</button>` : ""}
+    ${content}
+    ${media.length > 1 ? `<button class="gallery-nav next" aria-label="Next">&#10095;</button>` : ""}
+    ${media.length > 1 ? `<div class="gallery-counter">${index + 1} / ${media.length}</div>` : ""}
+  `;
+  overlay.querySelector(".gallery-close").addEventListener("click", closeGallery);
+  const prev = overlay.querySelector(".gallery-nav.prev");
+  const next = overlay.querySelector(".gallery-nav.next");
+  if(prev) prev.addEventListener("click", () => stepGallery(-1));
+  if(next) next.addEventListener("click", () => stepGallery(1));
+}
+
+function stepGallery(delta){
+  const len = galleryState.media.length;
+  galleryState.index = (galleryState.index + delta + len) % len;
+  renderGallery();
+}
+
+function closeGallery(){
+  document.getElementById("galleryOverlay").classList.remove("open");
+}
+
+function wireGalleryOverlay(){
+  const overlay = document.getElementById("galleryOverlay");
+  if(!overlay) return;
+  overlay.addEventListener("click", e => {
+    if(e.target === overlay) closeGallery();
+  });
+  document.addEventListener("keydown", e => {
+    if(!overlay.classList.contains("open")) return;
+    if(e.key === "Escape") closeGallery();
+    if(e.key === "ArrowLeft") stepGallery(-1);
+    if(e.key === "ArrowRight") stepGallery(1);
+  });
+}
+
+
 function productCard(p){
-  const media = p.img
-    ? `<img src="${p.img}" alt="${p.name}" loading="lazy">`
-    : ICONS[p.icon] || ICONS.port;
+  const media = mediaThumbHTML(p);
+  const mediaCount = (p.media || []).length;
   const stockLabel = p.stock === 0 ? `<span class="stock-flag out">Out of stock</span>`
     : p.stock <= 2 ? `<span class="stock-flag low">Only ${p.stock} left</span>`
     : `<span class="stock-flag">${p.stock} in stock</span>`;
   const catLabel = (CATEGORIES.find(c => c.id === p.cat) || {}).label || p.cat;
+  const galleryBadge = mediaCount > 1
+    ? `<button class="gallery-badge" data-gallery="${p.sku}" aria-label="View ${mediaCount} photos/videos">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M21 8v10a2 2 0 01-2 2H9" stroke-linecap="round"/></svg>
+        ${mediaCount}
+      </button>`
+    : "";
   return `
   <article class="card" data-reveal>
-    <div class="card-media">
+    <div class="card-media" ${mediaCount > 1 ? `data-gallery-open="${p.sku}"` : ""}>
       ${stockLabel}
+      ${galleryBadge}
       ${media}
       <button class="quick-add" data-add="${p.sku}" aria-label="Add ${p.name} to cart" ${p.stock === 0 ? "disabled" : ""}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
@@ -278,7 +361,7 @@ function renderCartDrawer(){
   if(footEl) footEl.style.display = "block";
   itemsEl.innerHTML = lines.map(l => `
     <div class="cart-row" data-row="${l.sku}">
-      <div class="cart-thumb">${l.product.img ? `<img src="${l.product.img}" alt="">` : ICONS[l.product.icon] || ICONS.port}</div>
+      <div class="cart-thumb">${mediaThumbHTML(l.product)}</div>
       <div class="cart-row-info">
         <div class="name">${l.product.name}</div>
         <div class="price">${formatJMD(l.product.price)}</div>

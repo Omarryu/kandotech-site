@@ -6,8 +6,13 @@
       "cat": "adapters",
       "price": 4500,
       "stock": 1,
-      "img": "assets/img/benfei-dp-vga.png",
-      "desc": "Gold-plated DisplayPort male to VGA female adapter. Plug-and-play, no driver needed \u2014 connects a DisplayPort laptop or desktop to a VGA monitor or projector."
+      "desc": "Gold-plated DisplayPort male to VGA female adapter. Plug-and-play, no driver needed — connects a DisplayPort laptop or desktop to a VGA monitor or projector.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/benfei-dp-vga.png"
+        }
+      ]
     },
     {
       "sku": "KCSS14",
@@ -15,8 +20,13 @@
       "cat": "adapters",
       "price": 4500,
       "stock": 2,
-      "img": "assets/img/imexx-dp-vga.png",
-      "desc": "Compact DisplayPort-to-VGA converter for older monitors and projectors."
+      "desc": "Compact DisplayPort-to-VGA converter for older monitors and projectors.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/imexx-dp-vga.png"
+        }
+      ]
     },
     {
       "sku": "KCSS16",
@@ -25,7 +35,8 @@
       "price": 4500,
       "stock": 4,
       "icon": "port",
-      "desc": "Reliable DisplayPort-to-VGA adapter, ideal for boardroom and classroom projector setups."
+      "desc": "Reliable DisplayPort-to-VGA adapter, ideal for boardroom and classroom projector setups.",
+      "media": []
     },
     {
       "sku": "KCSS17",
@@ -34,7 +45,8 @@
       "price": 4500,
       "stock": 1,
       "icon": "port",
-      "desc": "Unbranded DisplayPort-to-VGA adapter in white to match lighter-colored setups."
+      "desc": "Unbranded DisplayPort-to-VGA adapter in white to match lighter-colored setups.",
+      "media": []
     },
     {
       "sku": "KCSS18",
@@ -43,7 +55,8 @@
       "price": 4500,
       "stock": 4,
       "icon": "port",
-      "desc": "Converts an HDMI source to VGA input \u2014 a common fix for connecting newer laptops to older displays."
+      "desc": "Converts an HDMI source to VGA input — a common fix for connecting newer laptops to older displays.",
+      "media": []
     },
     {
       "sku": "KCSS19",
@@ -52,7 +65,8 @@
       "price": 4500,
       "stock": 1,
       "icon": "port",
-      "desc": "DisplayPort male to HDMI female adapter for driving an HDMI monitor or TV from a DisplayPort output."
+      "desc": "DisplayPort male to HDMI female adapter for driving an HDMI monitor or TV from a DisplayPort output.",
+      "media": []
     },
     {
       "sku": "KCSS20",
@@ -61,7 +75,8 @@
       "price": 4500,
       "stock": 2,
       "icon": "port",
-      "desc": "Unbranded DisplayPort-to-HDMI adapter, same function as our Xtech option in black."
+      "desc": "Unbranded DisplayPort-to-HDMI adapter, same function as our Xtech option in black.",
+      "media": []
     },
     {
       "sku": "KCSS21",
@@ -69,8 +84,13 @@
       "cat": "adapters",
       "price": 4500,
       "stock": 1,
-      "img": "assets/img/vga-dvi-adapter.jpg",
-      "desc": "Bidirectional DVI/VGA adapter \u2014 bridges a DVI-I graphics card to a VGA display."
+      "desc": "Bidirectional DVI/VGA adapter — bridges a DVI-I graphics card to a VGA display.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/vga-dvi-adapter.jpg"
+        }
+      ]
     },
     {
       "sku": "KCSS25",
@@ -78,8 +98,13 @@
       "cat": "av-cables",
       "price": 3500,
       "stock": 2,
-      "img": "assets/img/dp-cable-1.png",
-      "desc": "Full-size DisplayPort to DisplayPort cable, latching connectors on both ends for a secure fit."
+      "desc": "Full-size DisplayPort to DisplayPort cable, latching connectors on both ends for a secure fit.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/dp-cable-1.png"
+        }
+      ]
     },
     {
       "sku": "KCSS26",
@@ -88,7 +113,8 @@
       "price": 4500,
       "stock": 3,
       "icon": "cable",
-      "desc": "Standard HDMI-to-HDMI cable for TVs, monitors, and media boxes."
+      "desc": "Standard HDMI-to-HDMI cable for TVs, monitors, and media boxes.",
+      "media": []
     },
     {
       "sku": "KCSS23",
@@ -97,7 +123,8 @@
       "price": 3500,
       "stock": 3,
       "icon": "cable",
-      "desc": "15-pin VGA cable for legacy monitor and projector connections."
+      "desc": "15-pin VGA cable for legacy monitor and projector connections.",
+      "media": []
     },
     {
       "sku": "KCSS27",
@@ -106,7 +133,8 @@
       "price": 4500,
       "stock": 1,
       "icon": "cable",
-      "desc": "Dual-link DVI cable for high-resolution monitor connections."
+      "desc": "Dual-link DVI cable for high-resolution monitor connections.",
+      "media": []
     },
     {
       "sku": "KCSS38",
@@ -115,7 +143,8 @@
       "price": 2500,
       "stock": 4,
       "icon": "cable",
-      "desc": "Composite RCA cable for audio and video hand-off on older AV equipment."
+      "desc": "Composite RCA cable for audio and video hand-off on older AV equipment.",
+      "media": []
     },
     {
       "sku": "KCSS9",
@@ -123,8 +152,13 @@
       "cat": "networking",
       "price": 800,
       "stock": 7,
-      "img": "assets/img/nexxt-cat6-1ft-pack.jpg",
-      "desc": "Professional-series Cat6 U/UTP LSZH gigabit patch cord (part no. PCGPCC6CM01), molded boots, snagless connectors. Great for short rack-to-switch runs."
+      "desc": "Professional-series Cat6 U/UTP LSZH gigabit patch cord (part no. PCGPCC6CM01), molded boots, snagless connectors. Great for short rack-to-switch runs.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/nexxt-cat6-1ft-pack.jpg"
+        }
+      ]
     },
     {
       "sku": "KCSS8",
@@ -132,8 +166,13 @@
       "cat": "networking",
       "price": 800,
       "stock": 56,
-      "img": "assets/img/tripplite-cat6-1ft.jpg",
-      "desc": "Gigabit-rated Cat6 patch cable in the compact 1ft length \u2014 our most-stocked networking item."
+      "desc": "Gigabit-rated Cat6 patch cable in the compact 1ft length — our most-stocked networking item.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/tripplite-cat6-1ft.jpg"
+        }
+      ]
     },
     {
       "sku": "KCSS10",
@@ -141,8 +180,13 @@
       "cat": "networking",
       "price": 1200,
       "stock": 21,
-      "img": "assets/img/linkbasic-cat6-7ft.jpg",
-      "desc": "Longer 7ft Cat6 run for desk-to-wall-plate or switch-to-patch-panel connections."
+      "desc": "Longer 7ft Cat6 run for desk-to-wall-plate or switch-to-patch-panel connections.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/linkbasic-cat6-7ft.jpg"
+        }
+      ]
     },
     {
       "sku": "KCSS36",
@@ -151,7 +195,8 @@
       "price": 2500,
       "stock": 2,
       "icon": "lan",
-      "desc": "Standard RJ-45 ethernet patch cable."
+      "desc": "Standard RJ-45 ethernet patch cable.",
+      "media": []
     },
     {
       "sku": "KCSS22",
@@ -160,7 +205,8 @@
       "price": 3500,
       "stock": 2,
       "icon": "lan",
-      "desc": "Shielded USB-to-RJ45 cable for console/serial access on network equipment."
+      "desc": "Shielded USB-to-RJ45 cable for console/serial access on network equipment.",
+      "media": []
     },
     {
       "sku": "KCSS28",
@@ -169,7 +215,8 @@
       "price": 2500,
       "stock": 1,
       "icon": "lan",
-      "desc": "Adds a wired ethernet port to a laptop over USB \u2014 handy when Wi-Fi isn't reliable enough for the job."
+      "desc": "Adds a wired ethernet port to a laptop over USB — handy when Wi-Fi isn't reliable enough for the job.",
+      "media": []
     },
     {
       "sku": "KCSS24",
@@ -178,7 +225,8 @@
       "price": 3500,
       "stock": 1,
       "icon": "lan",
-      "desc": "Splits power and data from a single PoE run to power non-PoE devices like access points and cameras."
+      "desc": "Splits power and data from a single PoE run to power non-PoE devices like access points and cameras.",
+      "media": []
     },
     {
       "sku": "KCSS29",
@@ -187,7 +235,8 @@
       "price": 25000,
       "stock": 7,
       "icon": "sfp",
-      "desc": "1000BASE-SX multimode fibre SFP transceiver, genuine Cisco part GLC-SX-MMD."
+      "desc": "1000BASE-SX multimode fibre SFP transceiver, genuine Cisco part GLC-SX-MMD.",
+      "media": []
     },
     {
       "sku": "KCSS30",
@@ -196,7 +245,8 @@
       "price": 25000,
       "stock": 2,
       "icon": "sfp",
-      "desc": "10GBASE-SR multimode fibre SFP+ transceiver for 10-gig fibre links."
+      "desc": "10GBASE-SR multimode fibre SFP+ transceiver for 10-gig fibre links.",
+      "media": []
     },
     {
       "sku": "KCSS31",
@@ -205,7 +255,8 @@
       "price": 25000,
       "stock": 4,
       "icon": "sfp",
-      "desc": "1000BASE-T copper SFP with RJ45 port, genuine Cisco part GLC-TE."
+      "desc": "1000BASE-T copper SFP with RJ45 port, genuine Cisco part GLC-TE.",
+      "media": []
     },
     {
       "sku": "KCSS33",
@@ -214,7 +265,8 @@
       "price": 25000,
       "stock": 6,
       "icon": "sfp",
-      "desc": "1000BASE-T copper SFP with RJ45 port, genuine Cisco part GLC-T."
+      "desc": "1000BASE-T copper SFP with RJ45 port, genuine Cisco part GLC-T.",
+      "media": []
     },
     {
       "sku": "KCSS32",
@@ -223,7 +275,8 @@
       "price": 25000,
       "stock": 1,
       "icon": "sfp",
-      "desc": "Cisco GLC-TE compatible copper SFP, RJ45 port, from Proline."
+      "desc": "Cisco GLC-TE compatible copper SFP, RJ45 port, from Proline.",
+      "media": []
     },
     {
       "sku": "KCSS34",
@@ -232,7 +285,8 @@
       "price": 25000,
       "stock": 1,
       "icon": "sfp",
-      "desc": "Single-port fibre SFP transceiver by Skylane."
+      "desc": "Single-port fibre SFP transceiver by Skylane.",
+      "media": []
     },
     {
       "sku": "KCSS4",
@@ -240,8 +294,13 @@
       "cat": "power",
       "price": 9500,
       "stock": 7,
-      "img": "assets/img/lenovo-65w-adapter.png",
-      "desc": "Genuine Lenovo 65W laptop charger, model ADP-65FD B, slim-tip connector."
+      "desc": "Genuine Lenovo 65W laptop charger, model ADP-65FD B, slim-tip connector.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/lenovo-65w-adapter.png"
+        }
+      ]
     },
     {
       "sku": "KCSS2",
@@ -249,8 +308,13 @@
       "cat": "power",
       "price": 7500,
       "stock": 1,
-      "img": "assets/img/lenovo-45w-adapter.png",
-      "desc": "Brand-new genuine Lenovo 45W square-tip charger."
+      "desc": "Brand-new genuine Lenovo 45W square-tip charger.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/lenovo-45w-adapter.png"
+        }
+      ]
     },
     {
       "sku": "KCSS3",
@@ -259,7 +323,8 @@
       "price": 5000,
       "stock": 1,
       "icon": "power",
-      "desc": "Tested, working pre-owned Lenovo 45W slim-tip charger \u2014 budget option."
+      "desc": "Tested, working pre-owned Lenovo 45W slim-tip charger — budget option.",
+      "media": []
     },
     {
       "sku": "KCSS5",
@@ -267,8 +332,13 @@
       "cat": "power",
       "price": 2500,
       "stock": 6,
-      "img": "assets/img/lenovo-charger-cord.png",
-      "desc": "Replacement figure-8 power cord for ADLX45DLC3A and ADP-65FD Lenovo chargers."
+      "desc": "Replacement figure-8 power cord for ADLX45DLC3A and ADP-65FD Lenovo chargers.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/lenovo-charger-cord.png"
+        }
+      ]
     },
     {
       "sku": "KCSS11",
@@ -276,17 +346,27 @@
       "cat": "power",
       "price": 2500,
       "stock": 24,
-      "img": "assets/img/ac-power-cord-18awg.png",
-      "desc": "Standard IEC C13 3-prong desktop power cord, 18AWG."
+      "desc": "Standard IEC C13 3-prong desktop power cord, 18AWG.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/ac-power-cord-18awg.png"
+        }
+      ]
     },
     {
       "sku": "KCSS12",
-      "name": "Computer-to-PDU Power Extension Cord (C14\u2013C13)",
+      "name": "Computer-to-PDU Power Extension Cord (C14–C13)",
       "cat": "power",
       "price": 3500,
       "stock": 2,
-      "img": "assets/img/pdu-power-cord.png",
-      "desc": "IEC C14-to-C13 extension cord for routing rack equipment power through a PDU."
+      "desc": "IEC C14-to-C13 extension cord for routing rack equipment power through a PDU.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/pdu-power-cord.png"
+        }
+      ]
     },
     {
       "sku": "KCSS13",
@@ -294,8 +374,13 @@
       "cat": "power",
       "price": 4500,
       "stock": 1,
-      "img": "assets/img/lorom-switch-power-cord.jpg",
-      "desc": "Replacement power cord sized for network switch power bricks."
+      "desc": "Replacement power cord sized for network switch power bricks.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/lorom-switch-power-cord.jpg"
+        }
+      ]
     },
     {
       "sku": "KCSS7",
@@ -303,8 +388,13 @@
       "cat": "drives",
       "price": 4500,
       "stock": 6,
-      "img": "assets/img/dvd-drive-stack.png",
-      "desc": "Slim SATA multi-format DVD rewriter pulled from Dell desktops, tested and working."
+      "desc": "Slim SATA multi-format DVD rewriter pulled from Dell desktops, tested and working.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/dvd-drive-stack.png"
+        }
+      ]
     },
     {
       "sku": "KCSS6",
@@ -312,8 +402,13 @@
       "cat": "drives",
       "price": 3000,
       "stock": 2,
-      "img": "assets/img/dvd-drive-side.png",
-      "desc": "Slim SATA DVD-ROM drive (model DS-8D3SH14C), tested and working."
+      "desc": "Slim SATA DVD-ROM drive (model DS-8D3SH14C), tested and working.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/dvd-drive-side.png"
+        }
+      ]
     },
     {
       "sku": "KCSS35",
@@ -322,7 +417,8 @@
       "price": 2500,
       "stock": 3,
       "icon": "mouse",
-      "desc": "Basic wired desktop mouse \u2014 a reliable spare for any workstation."
+      "desc": "Basic wired desktop mouse — a reliable spare for any workstation.",
+      "media": []
     },
     {
       "sku": "KCSS37",
@@ -331,7 +427,8 @@
       "price": 3500,
       "stock": 2,
       "icon": "pins",
-      "desc": "Pack of 60 circuit-board jumper pins/shunts for motherboards and add-in cards."
+      "desc": "Pack of 60 circuit-board jumper pins/shunts for motherboards and add-in cards.",
+      "media": []
     },
     {
       "sku": "KCSS42",
@@ -340,7 +437,8 @@
       "price": 5500,
       "stock": 1,
       "icon": "scanner",
-      "desc": "USB barcode scanner, ready for point-of-sale or inventory use."
+      "desc": "USB barcode scanner, ready for point-of-sale or inventory use.",
+      "media": []
     },
     {
       "sku": "KCSS1",
@@ -349,7 +447,8 @@
       "price": 1500,
       "stock": 12,
       "icon": "cable",
-      "desc": "USB 2.0 printer cable (Type A to Type B), UL-rated AWM cable."
+      "desc": "USB 2.0 printer cable (Type A to Type B), UL-rated AWM cable.",
+      "media": []
     },
     {
       "sku": "KCSS39",
@@ -357,8 +456,13 @@
       "cat": "computers",
       "price": 30000,
       "stock": 4,
-      "img": "assets/img/desktop-pc-2.jpg",
-      "desc": "Refurbished Dell OptiPlex 9020 small-form desktop with an Intel Core i5 processor \u2014 ready for Windows, office, and light business use. Typical configuration in stock: Core i5, 8GB RAM, 1TB SATA HDD (7200 RPM). Photo shown is a representative small-form-factor desktop."
+      "desc": "Refurbished Dell OptiPlex 9020 small-form desktop with an Intel Core i5 processor — ready for Windows, office, and light business use. Typical configuration in stock: Core i5, 8GB RAM, 1TB SATA HDD (7200 RPM). Photo shown is a representative small-form-factor desktop.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/desktop-pc-2.jpg"
+        }
+      ]
     },
     {
       "sku": "KCSS40",
@@ -366,8 +470,13 @@
       "cat": "computers",
       "price": 30000,
       "stock": 1,
-      "img": "assets/img/desktop-pc-2.jpg",
-      "desc": "Refurbished Dell OptiPlex 9010 desktop with an Intel Core i5 processor. Typical configuration in stock: Core i5, 8GB RAM, 1TB SATA HDD (7200 RPM). Photo shown is a representative small-form-factor desktop."
+      "desc": "Refurbished Dell OptiPlex 9010 desktop with an Intel Core i5 processor. Typical configuration in stock: Core i5, 8GB RAM, 1TB SATA HDD (7200 RPM). Photo shown is a representative small-form-factor desktop.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/desktop-pc-2.jpg"
+        }
+      ]
     },
     {
       "sku": "KCSS41",
@@ -375,8 +484,13 @@
       "cat": "computers",
       "price": 30000,
       "stock": 2,
-      "img": "assets/img/desktop-pc-2.jpg",
-      "desc": "Refurbished Dell OptiPlex 390 desktop \u2014 a solid entry-level workhorse for everyday tasks. Photo shown is a representative small-form-factor desktop."
+      "desc": "Refurbished Dell OptiPlex 390 desktop — a solid entry-level workhorse for everyday tasks. Photo shown is a representative small-form-factor desktop.",
+      "media": [
+        {
+          "type": "image",
+          "url": "assets/img/desktop-pc-2.jpg"
+        }
+      ]
     }
   ],
   "categories": [
@@ -421,7 +535,7 @@
       "id": "network-audit",
       "name": "Multi-Site Network Assessment",
       "price": "Custom quote",
-      "desc": "Full infrastructure audit across multiple locations \u2014 cabling, switching, wireless coverage, and a client-ready report with findings and recommendations."
+      "desc": "Full infrastructure audit across multiple locations — cabling, switching, wireless coverage, and a client-ready report with findings and recommendations."
     },
     {
       "id": "install",
@@ -457,11 +571,19 @@
   "business": {
     "name": "Kandotech Computer Systems Services",
     "short": "Kandotech",
-    "tagline": "Parts, PCs & networking \u2014 sourced, tested, and ready to run.",
+    "tagline": "Parts, PCs & networking — sourced, tested, and ready to run.",
     "address": "Old Harbour, St. Catherine, Jamaica",
     "email": "hello@kandotech.com",
     "phone": "+1 (876) 555-0142",
     "currency": "JMD",
-    "hours": "Monday \u2013 Saturday, 9:00am \u2013 5:00pm"
+    "hoursByDay": {
+      "monday": "9:00am – 5:00pm",
+      "tuesday": "9:00am – 5:00pm",
+      "wednesday": "9:00am – 5:00pm",
+      "thursday": "9:00am – 5:00pm",
+      "friday": "9:00am – 5:00pm",
+      "saturday": "9:00am – 5:00pm",
+      "sunday": "Closed"
+    }
   }
 }

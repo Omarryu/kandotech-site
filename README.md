@@ -105,12 +105,50 @@ pricing before committing):
 2. Add the same environment variables under the Variables tab.
 3. Railway builds and starts it automatically (`npm install` + `npm start`).
 
-Either way, **note that uploaded images and catalog edits are stored on
-that server's own disk.** Most free/starter tiers on Render and Railway
-persist disk across deploys but wipe it if you switch plans or move
-regions — check your provider's current disk-persistence guarantees, and
-consider a paid persistent volume once you're relying on this for real
-inventory.
+## Making your data actually persist
+
+**Read this before relying on the admin console for real inventory.**
+
+By default, Render (and most similar hosts) run your app on an *ephemeral*
+filesystem — anything the server writes while running, including
+`live.json`/`draft.json` and uploaded photos, is wiped every time the
+service restarts. Free-tier services restart automatically after 15
+minutes with no traffic, so without the fix below, published changes will
+appear to work and then quietly reset later.
+
+**The fix (Render, ~$7.25/month total):**
+
+1. Your service needs to be on a **paid instance type** first — free
+   instances can't attach a persistent disk at all. On your service's page,
+   go to Settings and change the instance type to **Starter** ($7/month).
+   This also removes the 15-minute spin-down as a bonus.
+2. Go to the **Disks** tab on your service → **Add Disk**. Set the mount
+   path to `/var/data` and pick the smallest size (1GB is plenty — that's
+   roughly $0.25/month). Click Add.
+3. Go to **Environment** and add a variable: `DATA_DIR` = `/var/data`.
+4. Render redeploys automatically. Check the deploy log for the line
+   `Data directory: /var/data (from DATA_DIR env var)` — if you instead
+   see `(default, not persistent on Render/Railway)`, the environment
+   variable didn't take, double-check the exact spelling.
+5. The very first boot on that empty disk automatically copies in the
+   catalog you already have (from `server/backend/seed/`), so the site
+   won't start out blank — you'll see `Seeded live.json from defaults` in
+   the log exactly once.
+6. From here on, anything you publish or any photo you upload survives
+   restarts and redeploys, because it's writing to the persistent disk
+   instead of the app's temporary filesystem.
+
+**Railway** has an equivalent "Volumes" feature under a service's Settings
+tab — same idea: attach a volume, mount it, point `DATA_DIR` at the mount
+path.
+
+If you'd rather not pay anything extra and are comfortable with more
+moving parts, the free alternative is migrating `live.json`/`draft.json`
+storage to an external database (e.g., Render's free Postgres, which does
+persist data — just not disk files) and image uploads to a free-tier
+object storage service (e.g., Cloudinary's free tier). That's a real
+re-architecture, not a config change — ask if you want to go that route
+instead.
 
 ## Payment setup
 

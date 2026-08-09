@@ -210,42 +210,60 @@ function productRow(p){
   const catOptions = draft.categories.map(c =>
     `<option value="${c.id}" ${c.id === p.cat ? "selected" : ""}>${c.label}</option>`
   ).join("");
-  const thumbContent = p.img
-    ? `<img src="${p.img}" alt="">`
-    : (ICONS[p.icon] || ICONS.port);
   const stockClass = p.stock === 0 ? "zero" : "";
   const uid = safeId(p.sku);
+  const media = Array.isArray(p.media) ? p.media : [];
+  const coverContent = media.length ? mediaThumbHTML(p) : (ICONS[p.icon] || ICONS.port);
   return `
   <div class="product-row" data-sku="${p.sku}">
-    <div class="thumb" data-upload="${p.sku}">
-      ${thumbContent}
-      <label class="sr-only" for="file-${uid}">Upload photo for ${escapeAttr(p.name)}</label>
-      <input type="file" id="file-${uid}" accept="image/*" data-file-for="${p.sku}">
+    <div class="product-row-main">
+      <div class="thumb" title="Cover photo — shown in the catalog grid">
+        ${coverContent}
+      </div>
+      <div class="field-stack">
+        <label for="name-${uid}">Name</label>
+        <input type="text" id="name-${uid}" data-field="name" data-sku="${p.sku}" value="${escapeAttr(p.name)}">
+        <label class="sr-only" for="desc-${uid}">Description</label>
+        <textarea id="desc-${uid}" data-field="desc" data-sku="${p.sku}" rows="2">${p.desc}</textarea>
+        <span class="sku-tag">${p.sku}</span>
+      </div>
+      <div class="field-stack">
+        <label for="cat-${uid}">Category</label>
+        <select id="cat-${uid}" data-field="cat" data-sku="${p.sku}">${catOptions}</select>
+        <span class="field-note">Stock <span class="stock-pill ${stockClass}">${p.stock} on hand</span></span>
+      </div>
+      <div class="field-stack">
+        <label for="price-${uid}">Price (JMD)</label>
+        <input type="number" id="price-${uid}" min="0" step="1" data-field="price" data-sku="${p.sku}" value="${p.price}">
+      </div>
+      <div class="field-stack">
+        <label for="stock-${uid}">Stock qty</label>
+        <input type="number" id="stock-${uid}" min="0" step="1" data-field="stock" data-sku="${p.sku}" value="${p.stock}">
+      </div>
+      <div class="row-actions">
+        <button class="icon-danger" data-delete="${p.sku}" title="Delete product" aria-label="Delete product">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="field-stack">
-      <label for="name-${uid}">Name</label>
-      <input type="text" id="name-${uid}" data-field="name" data-sku="${p.sku}" value="${escapeAttr(p.name)}">
-      <label class="sr-only" for="desc-${uid}">Description</label>
-      <textarea id="desc-${uid}" data-field="desc" data-sku="${p.sku}" rows="2">${p.desc}</textarea>
-      <span class="sku-tag">${p.sku}</span>
-    </div>
-    <div class="field-stack">
-      <label for="cat-${uid}">Category</label>
-      <select id="cat-${uid}" data-field="cat" data-sku="${p.sku}">${catOptions}</select>
-      <span class="field-note">Stock <span class="stock-pill ${stockClass}">${p.stock} on hand</span></span>
-    </div>
-    <div class="field-stack">
-      <label for="price-${uid}">Price (JMD)</label>
-      <input type="number" id="price-${uid}" min="0" step="1" data-field="price" data-sku="${p.sku}" value="${p.price}">
-    </div>
-    <div class="field-stack">
-      <label for="stock-${uid}">Stock qty</label>
-      <input type="number" id="stock-${uid}" min="0" step="1" data-field="stock" data-sku="${p.sku}" value="${p.stock}">
-    </div>
-    <div class="row-actions">
-      <button class="icon-danger" data-delete="${p.sku}" title="Delete product" aria-label="Delete product">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
+
+    <div class="media-strip">
+      <span class="media-strip-label">Photos &amp; videos <span class="dim">(the first one is the cover photo shown in the catalog)</span></span>
+      <div class="media-strip-items">
+        ${media.map((m, i) => `
+          <div class="media-chip ${i === 0 ? "is-cover" : ""}" data-media-index="${i}">
+            ${m.type === "video"
+              ? `<video src="${m.url}" muted></video><span class="media-chip-badge">▶</span>`
+              : `<img src="${m.url}" alt="">`}
+            ${i === 0 ? `<span class="media-chip-cover-tag">Cover</span>` : `<button class="media-chip-star" data-make-cover="${p.sku}" data-media-idx="${i}" title="Make this the cover photo">★</button>`}
+            <button class="media-chip-remove" data-remove-media="${p.sku}" data-media-idx="${i}" aria-label="Remove this photo">&times;</button>
+          </div>
+        `).join("")}
+        <label class="media-add-btn" for="media-file-${uid}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+          <input type="file" id="media-file-${uid}" accept="image/*,video/mp4,video/webm,video/quicktime" multiple data-media-for="${p.sku}" class="sr-only">
+        </label>
+      </div>
     </div>
   </div>`;
 }
@@ -286,34 +304,60 @@ function wireProductRowEvents(container){
     });
   });
 
-  container.querySelectorAll(".thumb").forEach(thumb => {
-    thumb.addEventListener("click", () => {
-      thumb.querySelector("input[type=file]").click();
+  container.querySelectorAll("[data-media-for]").forEach(fileInput => {
+    fileInput.addEventListener("change", async () => {
+      const files = Array.from(fileInput.files || []);
+      if(!files.length) return;
+      const sku = fileInput.dataset.mediaFor;
+      const product = draft.products.find(p => p.sku === sku);
+      if(!product) return;
+      if(!Array.isArray(product.media)) product.media = [];
+
+      let uploaded = 0;
+      for(const file of files){
+        try{
+          const form = new FormData();
+          form.append("image", file); // same field name the backend expects for any upload
+          const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+          const data = await res.json();
+          if(!res.ok) throw new Error(data.error || "Upload failed");
+          product.media.push({ type: data.type || "image", url: data.url });
+          uploaded++;
+        }catch(e){
+          showAdminToast(`"${file.name}" failed: ${e.message || "upload error"}`);
+        }
+      }
+      if(uploaded){
+        renderProducts();
+        scheduleSave();
+        showAdminToast(`Added ${uploaded} item${uploaded === 1 ? "" : "s"} to the gallery. Publish to make it live.`);
+      }
+      fileInput.value = "";
     });
   });
 
-  container.querySelectorAll("[data-file-for]").forEach(fileInput => {
-    fileInput.addEventListener("change", async () => {
-      const file = fileInput.files[0];
-      if(!file) return;
-      const sku = fileInput.dataset.fileFor;
-      const thumb = fileInput.closest(".thumb");
-      thumb.style.opacity = ".5";
-      try{
-        const form = new FormData();
-        form.append("image", file);
-        const res = await fetch("/api/admin/upload", { method: "POST", body: form });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.error || "Upload failed");
-        const product = draft.products.find(p => p.sku === sku);
-        product.img = data.url;
-        renderProducts();
-        scheduleSave();
-        showAdminToast("Image uploaded. Publish to make it live.");
-      }catch(e){
-        showAdminToast(e.message || "Image upload failed.");
-        thumb.style.opacity = "1";
-      }
+  container.querySelectorAll("[data-make-cover]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const sku = btn.dataset.makeCover;
+      const idx = Number(btn.dataset.mediaIdx);
+      const product = draft.products.find(p => p.sku === sku);
+      if(!product || !Array.isArray(product.media)) return;
+      const [item] = product.media.splice(idx, 1);
+      product.media.unshift(item);
+      renderProducts();
+      scheduleSave();
+    });
+  });
+
+  container.querySelectorAll("[data-remove-media]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const sku = btn.dataset.removeMedia;
+      const idx = Number(btn.dataset.mediaIdx);
+      const product = draft.products.find(p => p.sku === sku);
+      if(!product || !Array.isArray(product.media)) return;
+      product.media.splice(idx, 1);
+      renderProducts();
+      scheduleSave();
     });
   });
 }
@@ -323,7 +367,7 @@ function wireAddButtons(){
     const sku = "NEW-" + Date.now().toString(36).toUpperCase();
     draft.products.unshift({
       sku, name: "New product", cat: (draft.categories[0] || {}).id || "", price: 0, stock: 0,
-      desc: "", icon: "port",
+      desc: "", icon: "port", media: [],
     });
     searchTerm = "";
     document.getElementById("adminSearch").value = "";
@@ -421,30 +465,63 @@ function renderServices(){
 }
 
 /* ---------- business info ---------- */
+const DAYS = [
+  { key: "monday", label: "Monday" },
+  { key: "tuesday", label: "Tuesday" },
+  { key: "wednesday", label: "Wednesday" },
+  { key: "thursday", label: "Thursday" },
+  { key: "friday", label: "Friday" },
+  { key: "saturday", label: "Saturday" },
+  { key: "sunday", label: "Sunday" },
+];
+
 function renderBusinessForm(){
   const el = document.getElementById("businessForm");
   if(!el) return;
   const b = draft.business || {};
+  if(!b.hoursByDay) b.hoursByDay = {};
   const fields = [
-    { key: "name",    label: "Full business name",  type: "text" },
-    { key: "short",   label: "Short name (header logo)", type: "text" },
-    { key: "tagline", label: "Tagline", type: "text" },
-    { key: "address", label: "Address", type: "text" },
-    { key: "phone",   label: "Phone", type: "text" },
-    { key: "email",   label: "Email", type: "text" },
-    { key: "hours",   label: "Hours", type: "text" },
+    { key: "name",    label: "Full business name" },
+    { key: "short",   label: "Short name (header logo)" },
+    { key: "tagline", label: "Tagline" },
+    { key: "address", label: "Address" },
+    { key: "phone",   label: "Phone" },
+    { key: "email",   label: "Email" },
   ];
-  el.innerHTML = fields.map(f => `
-    <div class="field">
-      <label for="biz-${f.key}">${f.label}</label>
-      <input id="biz-${f.key}" type="${f.type}" data-bfield="${f.key}" value="${escapeAttr(b[f.key] || "")}">
+
+  el.innerHTML = `
+    ${fields.map(f => `
+      <div class="field">
+        <label for="biz-${f.key}">${f.label}</label>
+        <input id="biz-${f.key}" type="text" data-bfield="${f.key}" value="${escapeAttr(b[f.key] || "")}">
+      </div>
+    `).join("")}
+
+    <h4 class="hours-heading">Hours by day</h4>
+    <p class="dim" style="margin:0 0 12px; font-size:.82rem;">Type a time range for each day, or "Closed" for days you're not open.</p>
+    <div class="hours-grid">
+      ${DAYS.map(d => `
+        <div class="field">
+          <label for="biz-hours-${d.key}">${d.label}</label>
+          <input id="biz-hours-${d.key}" type="text" data-hfield="${d.key}" value="${escapeAttr(b.hoursByDay[d.key] || "")}" placeholder="e.g. 9:00am – 5:00pm or Closed">
+        </div>
+      `).join("")}
     </div>
-  `).join("");
+  `;
 
   el.querySelectorAll("[data-bfield]").forEach(input => {
     input.addEventListener("input", () => {
       if(!draft.business) draft.business = {};
       draft.business[input.dataset.bfield] = input.value;
+      scheduleSave();
+    });
+  });
+
+  el.querySelectorAll("[data-hfield]").forEach(input => {
+    input.addEventListener("input", () => {
+      if(!draft.business) draft.business = {};
+      if(!draft.business.hoursByDay) draft.business.hoursByDay = {};
+      draft.business.hoursByDay[input.dataset.hfield] = input.value;
       scheduleSave();
     });
   });

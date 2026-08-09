@@ -38,24 +38,50 @@ const app = express();
 app.set("trust proxy", 1); // correct req.protocol/host behind a reverse proxy (cPanel, Render, etc.)
 
 const ROOT = path.join(__dirname, "..", ".."); // the site root (index.html, css/, js/, assets/)
-const DATA_DIR = path.join(__dirname, "data");
+
+// --------------------------------------------------------------------------
+// Where catalog data and uploaded images actually live.
+//
+// By default this is a folder inside the app itself — fine for local dev,
+// and fine for hosts with a genuinely persistent filesystem (a VPS, or
+// Namecheap-style shared hosting). It is NOT fine on hosts that rebuild the
+// container from scratch on every deploy/restart (Render, Railway, most
+// "PaaS" free tiers) — on those, set the DATA_DIR environment variable to
+// point at an attached persistent disk (e.g. DATA_DIR=/var/data on Render),
+// so admin edits and uploaded photos survive redeploys and restarts.
+// See README.md → "Making your data actually persist" for setup steps.
+// --------------------------------------------------------------------------
+const SEED_DIR = path.join(__dirname, "seed");
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 const LIVE_PATH = path.join(DATA_DIR, "live.json");
 const DRAFT_PATH = path.join(DATA_DIR, "draft.json");
-const UPLOAD_DIR = path.join(ROOT, "assets", "img", "uploads");
+const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 const INDEX_HTML = path.join(ROOT, "index.html");
 
 console.log("=== Kandotech server starting ===");
 console.log("Node version:", process.version);
 console.log("__dirname:", __dirname);
 console.log("Computed site ROOT:", ROOT);
+console.log("Data directory:", DATA_DIR, process.env.DATA_DIR ? "(from DATA_DIR env var)" : "(default, not persistent on Render/Railway)");
 console.log("index.html found at ROOT?", fs.existsSync(INDEX_HTML));
-console.log("live.json found?", fs.existsSync(LIVE_PATH));
 
+// First boot on a fresh/empty persistent disk: seed it from the committed
+// defaults so the site isn't blank the first time this runs.
 try {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  if (!fs.existsSync(LIVE_PATH)) {
+    fs.copyFileSync(path.join(SEED_DIR, "live.json"), LIVE_PATH);
+    console.log("Seeded live.json from defaults (first boot on this data directory).");
+  }
+  if (!fs.existsSync(DRAFT_PATH)) {
+    fs.copyFileSync(LIVE_PATH, DRAFT_PATH);
+    console.log("Seeded draft.json from live.json.");
+  }
 } catch (err) {
-  console.error("Could not create upload directory (image uploads will fail until this is fixed):", err.message);
+  console.error("Could not set up the data directory — check DATA_DIR permissions:", err.message);
 }
+console.log("live.json found?", fs.existsSync(LIVE_PATH));
 
 const PORT = process.env.PORT || 4242;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme";
@@ -63,6 +89,7 @@ const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(ROOT));
+app.use("/assets/img/uploads", express.static(UPLOAD_DIR));
 
 // --------------------------------------------------------------------------
 // Diagnostics — open this URL in a browser to see exactly what the server
@@ -81,6 +108,8 @@ app.get("/__diagnostics", (req, res) => {
     nodeVersion: process.version,
     dirname: __dirname,
     computedRoot: ROOT,
+    dataDir: DATA_DIR,
+    dataDirIsPersistent: !!process.env.DATA_DIR,
     indexHtmlExists: fs.existsSync(INDEX_HTML),
     cssExists: fs.existsSync(path.join(ROOT, "css", "style.css")),
     jsExists: fs.existsSync(path.join(ROOT, "js", "data.js")),
@@ -240,17 +269,19 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 40 * 1024 * 1024 }, // 40MB — enough for a short product-demo clip
   fileFilter: (req, file, cb) => {
-    const ok = /^image\/(png|jpe?g|webp|gif)$/.test(file.mimetype);
-    cb(ok ? null : new Error("Only image files are allowed"), ok);
+    const ok = /^image\/(png|jpe?g|webp|gif)$/.test(file.mimetype) ||
+               /^video\/(mp4|webm|quicktime)$/.test(file.mimetype);
+    cb(ok ? null : new Error("Only images (png/jpg/webp/gif) or videos (mp4/webm/mov) are allowed"), ok);
   },
 });
 
 app.post("/api/admin/upload", requireAdmin, upload.single("image"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
   const relPath = `assets/img/uploads/${req.file.filename}`;
-  res.json({ url: relPath });
+  const type = req.file.mimetype.startsWith("video/") ? "video" : "image";
+  res.json({ url: relPath, type });
 });
 
 app.use((err, req, res, next) => {
