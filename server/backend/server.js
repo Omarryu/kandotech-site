@@ -234,6 +234,15 @@ app.put("/api/admin/catalog", requireAdmin, (req, res) => {
   if (!Array.isArray(products)) {
     return res.status(400).json({ error: "products must be an array" });
   }
+  const skusSeen = new Set();
+  for (const p of products) {
+    const sku = (p.sku || "").trim().toLowerCase();
+    if (!sku) return res.status(400).json({ error: "Every product needs a non-empty SKU." });
+    if (skusSeen.has(sku)) {
+      return res.status(400).json({ error: `Duplicate SKU "${p.sku}" — SKUs must be unique.` });
+    }
+    skusSeen.add(sku);
+  }
   writeJSON(DRAFT_PATH, {
     products,
     categories: categories || [],

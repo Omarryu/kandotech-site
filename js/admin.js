@@ -113,10 +113,14 @@ async function saveDraft(){
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(draft),
     });
-    if(!res.ok) throw new Error("save failed");
+    if(!res.ok){
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || "save failed");
+    }
     setSaveStatus("saved");
   }catch(e){
     setSaveStatus("error");
+    showAdminToast(e.message || "Couldn't save your changes.");
   }
 }
 
@@ -202,46 +206,50 @@ function renderProducts(){
     el.innerHTML = `<div class="empty-state">No products match your search.</div>`;
     return;
   }
-  el.innerHTML = items.map(p => productRow(p)).join("");
+  // Pass each product's position in the FULL draft.products array (not the
+  // filtered list) — edits always target that stable index, so renaming a
+  // SKU can't orphan the other fields in the same row mid-edit.
+  el.innerHTML = items.map(p => productRow(p, draft.products.indexOf(p))).join("");
   wireProductRowEvents(el);
 }
 
-function productRow(p){
+function productRow(p, index){
   const catOptions = draft.categories.map(c =>
     `<option value="${c.id}" ${c.id === p.cat ? "selected" : ""}>${c.label}</option>`
   ).join("");
   const stockClass = p.stock === 0 ? "zero" : "";
-  const uid = safeId(p.sku);
+  const uid = safeId(p.sku) + "-" + index;
   const media = Array.isArray(p.media) ? p.media : [];
   const coverContent = media.length ? mediaThumbHTML(p) : (ICONS[p.icon] || ICONS.port);
   return `
-  <div class="product-row" data-sku="${p.sku}">
+  <div class="product-row" data-index="${index}">
     <div class="product-row-main">
       <div class="thumb" title="Cover photo — shown in the catalog grid">
         ${coverContent}
       </div>
       <div class="field-stack">
         <label for="name-${uid}">Name</label>
-        <input type="text" id="name-${uid}" data-field="name" data-sku="${p.sku}" value="${escapeAttr(p.name)}">
+        <input type="text" id="name-${uid}" data-field="name" data-index="${index}" value="${escapeAttr(p.name)}">
         <label class="sr-only" for="desc-${uid}">Description</label>
-        <textarea id="desc-${uid}" data-field="desc" data-sku="${p.sku}" rows="2">${p.desc}</textarea>
-        <span class="sku-tag">${p.sku}</span>
+        <textarea id="desc-${uid}" data-field="desc" data-index="${index}" rows="2">${p.desc}</textarea>
+        <label for="sku-${uid}" class="sr-only">SKU / item number</label>
+        <input type="text" id="sku-${uid}" class="sku-input mono" data-field="sku" data-index="${index}" value="${escapeAttr(p.sku)}" placeholder="SKU / item number">
       </div>
       <div class="field-stack">
         <label for="cat-${uid}">Category</label>
-        <select id="cat-${uid}" data-field="cat" data-sku="${p.sku}">${catOptions}</select>
+        <select id="cat-${uid}" data-field="cat" data-index="${index}">${catOptions}</select>
         <span class="field-note">Stock <span class="stock-pill ${stockClass}">${p.stock} on hand</span></span>
       </div>
       <div class="field-stack">
         <label for="price-${uid}">Price (JMD)</label>
-        <input type="number" id="price-${uid}" min="0" step="1" data-field="price" data-sku="${p.sku}" value="${p.price}">
+        <input type="number" id="price-${uid}" min="0" step="1" data-field="price" data-index="${index}" value="${p.price}">
       </div>
       <div class="field-stack">
         <label for="stock-${uid}">Stock qty</label>
-        <input type="number" id="stock-${uid}" min="0" step="1" data-field="stock" data-sku="${p.sku}" value="${p.stock}">
+        <input type="number" id="stock-${uid}" min="0" step="1" data-field="stock" data-index="${index}" value="${p.stock}">
       </div>
       <div class="row-actions">
-        <button class="icon-danger" data-delete="${p.sku}" title="Delete product" aria-label="Delete product">
+        <button class="icon-danger" data-delete-index="${index}" title="Delete product" aria-label="Delete product">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
@@ -255,13 +263,13 @@ function productRow(p){
             ${m.type === "video"
               ? `<video src="${m.url}" muted></video><span class="media-chip-badge">▶</span>`
               : `<img src="${m.url}" alt="">`}
-            ${i === 0 ? `<span class="media-chip-cover-tag">Cover</span>` : `<button class="media-chip-star" data-make-cover="${p.sku}" data-media-idx="${i}" title="Make this the cover photo">★</button>`}
-            <button class="media-chip-remove" data-remove-media="${p.sku}" data-media-idx="${i}" aria-label="Remove this photo">&times;</button>
+            ${i === 0 ? `<span class="media-chip-cover-tag">Cover</span>` : `<button class="media-chip-star" data-make-cover-index="${index}" data-media-idx="${i}" title="Make this the cover photo">★</button>`}
+            <button class="media-chip-remove" data-remove-media-index="${index}" data-media-idx="${i}" aria-label="Remove this photo">&times;</button>
           </div>
         `).join("")}
         <label class="media-add-btn" for="media-file-${uid}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
-          <input type="file" id="media-file-${uid}" accept="image/*,video/mp4,video/webm,video/quicktime" multiple data-media-for="${p.sku}" class="sr-only">
+          <input type="file" id="media-file-${uid}" accept="image/*,video/mp4,video/webm,video/quicktime" multiple data-media-for-index="${index}" class="sr-only">
         </label>
       </div>
     </div>
@@ -274,16 +282,35 @@ function safeId(str){
 
 function wireProductRowEvents(container){
   container.querySelectorAll("[data-field]").forEach(input => {
-    input.addEventListener("input", () => {
-      const sku = input.dataset.sku;
+    const commitEvent = input.dataset.field === "sku" ? "change" : "input"; // validate SKU only once typing settles
+    input.addEventListener(commitEvent, () => {
+      const index = Number(input.dataset.index);
       const field = input.dataset.field;
-      const product = draft.products.find(p => p.sku === sku);
+      const product = draft.products[index];
       if(!product) return;
       let value = input.value;
+
       if(field === "price" || field === "stock") value = Math.max(0, Number(value) || 0);
+
+      if(field === "sku"){
+        const newSku = value.trim();
+        if(!newSku){
+          showAdminToast("SKU can't be empty — reverted.");
+          input.value = product.sku;
+          return;
+        }
+        const clash = draft.products.some((p, i) => i !== index && p.sku.toLowerCase() === newSku.toLowerCase());
+        if(clash){
+          showAdminToast(`SKU "${newSku}" is already used by another product — reverted.`);
+          input.value = product.sku;
+          return;
+        }
+        value = newSku;
+      }
+
       product[field] = value;
       if(field === "stock"){
-        const pill = container.querySelector(`[data-sku="${sku}"] .stock-pill`);
+        const pill = container.querySelector(`[data-index="${index}"] .stock-pill`);
         if(pill){
           pill.textContent = `${value} on hand`;
           pill.classList.toggle("zero", Number(value) === 0);
@@ -293,23 +320,23 @@ function wireProductRowEvents(container){
     });
   });
 
-  container.querySelectorAll("[data-delete]").forEach(btn => {
+  container.querySelectorAll("[data-delete-index]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const sku = btn.dataset.delete;
-      const product = draft.products.find(p => p.sku === sku);
-      if(!confirm(`Delete "${product ? product.name : sku}"? This can't be undone.`)) return;
-      draft.products = draft.products.filter(p => p.sku !== sku);
+      const index = Number(btn.dataset.deleteIndex);
+      const product = draft.products[index];
+      if(!confirm(`Delete "${product ? product.name : "this product"}"? This can't be undone.`)) return;
+      draft.products.splice(index, 1);
       renderProducts();
       scheduleSave();
     });
   });
 
-  container.querySelectorAll("[data-media-for]").forEach(fileInput => {
+  container.querySelectorAll("[data-media-for-index]").forEach(fileInput => {
     fileInput.addEventListener("change", async () => {
       const files = Array.from(fileInput.files || []);
       if(!files.length) return;
-      const sku = fileInput.dataset.mediaFor;
-      const product = draft.products.find(p => p.sku === sku);
+      const index = Number(fileInput.dataset.mediaForIndex);
+      const product = draft.products[index];
       if(!product) return;
       if(!Array.isArray(product.media)) product.media = [];
 
@@ -336,11 +363,11 @@ function wireProductRowEvents(container){
     });
   });
 
-  container.querySelectorAll("[data-make-cover]").forEach(btn => {
+  container.querySelectorAll("[data-make-cover-index]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const sku = btn.dataset.makeCover;
+      const index = Number(btn.dataset.makeCoverIndex);
       const idx = Number(btn.dataset.mediaIdx);
-      const product = draft.products.find(p => p.sku === sku);
+      const product = draft.products[index];
       if(!product || !Array.isArray(product.media)) return;
       const [item] = product.media.splice(idx, 1);
       product.media.unshift(item);
@@ -349,11 +376,11 @@ function wireProductRowEvents(container){
     });
   });
 
-  container.querySelectorAll("[data-remove-media]").forEach(btn => {
+  container.querySelectorAll("[data-remove-media-index]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const sku = btn.dataset.removeMedia;
+      const index = Number(btn.dataset.removeMediaIndex);
       const idx = Number(btn.dataset.mediaIdx);
-      const product = draft.products.find(p => p.sku === sku);
+      const product = draft.products[index];
       if(!product || !Array.isArray(product.media)) return;
       product.media.splice(idx, 1);
       renderProducts();
@@ -373,7 +400,7 @@ function wireAddButtons(){
     document.getElementById("adminSearch").value = "";
     renderProducts();
     scheduleSave();
-    const row = document.querySelector(`.product-row[data-sku="${sku}"] input[data-field="name"]`);
+    const row = document.querySelector(`.product-row[data-index="0"] input[data-field="name"]`);
     if(row){ row.focus(); row.select(); }
   });
 

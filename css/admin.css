@@ -72,7 +72,12 @@
   color:var(--text); font-family:inherit; font-size:.86rem; width:100%;
 }
 .product-row textarea{ resize:vertical; min-height:38px; }
-.product-row .sku-tag{ font-family:var(--font-mono); font-size:.72rem; color:var(--text-faint); margin-top:4px; display:block; }
+.product-row .sku-input{
+  font-family:var(--font-mono); font-size:.78rem; color:var(--text-dim);
+  background:var(--surface); border:1px solid var(--border); border-radius:6px;
+  padding:5px 8px; margin-top:4px; width:100%;
+}
+.product-row .sku-input:focus{ border-color:var(--violet); color:var(--text); }
 .row-actions{ display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
 .icon-danger{
   background:var(--surface); border:1px solid var(--border); color:var(--text-faint); width:34px; height:34px;
