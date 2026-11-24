@@ -62,6 +62,7 @@
   <div class="container admin-main">
     <div class="tabs">
       <button class="tab active" data-tab="products">Products</button>
+      <button class="tab" data-tab="home">Home page</button>
       <button class="tab" data-tab="categories">Categories</button>
       <button class="tab" data-tab="services">Services</button>
       <button class="tab" data-tab="business">Business Info</button>
@@ -74,6 +75,15 @@
         <button class="btn btn-primary btn-sm" id="addProductBtn">+ Add product</button>
       </div>
       <div id="productTable" class="product-table"></div>
+    </section>
+
+    <!-- ---------- home page tab ---------- -->
+    <section class="tab-panel" data-panel="home" hidden>
+      <div class="panel-head">
+        <p class="dim" style="margin:0; max-width:60ch;">Edit what visitors see on the home page: an announcement bar, the top banner text, flyers and pictures, and your own text sections. Changes follow the same draft &rarr; publish flow as products.</p>
+        <button class="btn btn-ghost btn-sm" id="previewDraftBtn" type="button">Preview draft &#8599;</button>
+      </div>
+      <div id="homeEditor" class="home-editor"></div>
     </section>
 
     <!-- ---------- categories tab ---------- -->

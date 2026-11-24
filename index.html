@@ -52,13 +52,13 @@
     <div>
       <div class="eyebrow">
         <span class="pin-strip cool small"><span></span><span></span><span></span></span>
-        Old Harbour · St. Catherine · Jamaica
+        <span id="heroEyebrow">Old Harbour · St. Catherine · Jamaica</span>
       </div>
-      <h1>Every port, cable and <span class="gradient-text">machine</span> your office actually runs on.</h1>
-      <p class="lead">Kandotech stocks the parts IT techs reach for daily — adapters, patch cable, SFPs, power cords, drives, and refurbished desktops — plus the on-site services to install and support them.</p>
+      <h1 id="heroTitle">Every port, cable and <span class="gradient-text">machine</span> your office actually runs on.</h1>
+      <p class="lead" id="heroLead">Kandotech stocks the parts IT techs reach for daily — adapters, patch cable, SFPs, power cords, drives, and refurbished desktops — plus the on-site services to install and support them.</p>
       <div class="hero-ctas">
-        <a href="catalog.html" class="btn btn-primary">Browse the catalog</a>
-        <a href="services.html" class="btn btn-ghost">See our services</a>
+        <a href="catalog.html" class="btn btn-primary" id="heroPrimary">Browse the catalog</a>
+        <a href="services.html" class="btn btn-ghost" id="heroSecondary">See our services</a>
       </div>
       <div class="hero-stats">
         <div class="hero-stat"><b id="statSkus" data-count="0">0</b><span>SKUs in stock</span></div>
@@ -67,7 +67,7 @@
       </div>
     </div>
     <div class="hero-visual">
-      <div class="stack">
+      <div class="stack" id="heroStack">
         <div class="stack-card">
           <img src="assets/img/benfei-dp-vga.png" alt="DisplayPort to VGA adapter">
           <div class="tag">DisplayPort → VGA · J$4,500</div>
@@ -85,6 +85,19 @@
   </div>
 </section>
 
+<section id="homeFlyers" class="home-flyers" hidden>
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="kicker">Latest</span>
+        <h2 id="flyersTitle">Flyers &amp; promotions</h2>
+        <p id="flyersIntro" hidden></p>
+      </div>
+    </div>
+    <div class="flyer-grid" id="flyerGrid"></div>
+  </div>
+</section>
+
 <section id="shop-by-category" class="section-alt">
   <div class="container">
     <div class="section-head">
@@ -98,17 +111,7 @@
   </div>
 </section>
 
-<section>
-  <div class="container center" style="max-width:640px;">
-    <span class="kicker" style="display:block; margin-bottom:8px;">Why Kandotech</span>
-    <h2 style="font-size:1.8rem;">Tested before it's listed, stocked for the job in front of you.</h2>
-    <p style="color:var(--text-dim);">Every pre-owned drive, adapter, and charger is checked working before it goes on the shelf. Based in Old Harbour, we support single offices and multi-location rollouts across Jamaica.</p>
-    <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
-      <a href="about.html" class="btn btn-outline">More about us</a>
-      <a href="contact.html" class="btn btn-primary">Get in touch</a>
-    </div>
-  </div>
-</section>
+<div id="homeSections"></div>
 
 <footer>
   <div class="container">
