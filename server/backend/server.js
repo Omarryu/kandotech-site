@@ -194,8 +194,159 @@ function broadcastUpdate() {
 // public API — the storefront reads from here
 // --------------------------------------------------------------------------
 app.get("/api/catalog", (req, res) => {
-  res.json(readJSON(LIVE_PATH));
+  // ?draft=1 lets a logged-in admin preview unpublished changes on the real site.
+  const wantDraft = req.query.draft === "1" && isAdminSession(req);
+  res.set("Cache-Control", "no-store");
+  const body = withHomeDefaults(readJSON(wantDraft ? DRAFT_PATH : LIVE_PATH));
+  if (wantDraft) body.preview = true; // lets the page know it is showing unpublished content
+  res.json(body);
 });
+
+// --------------------------------------------------------------------------
+// Editable home page content (announcement bar, hero text, flyers, sections).
+// Stored under `home` in draft.json / live.json like everything else, so it
+// follows the same draft -> publish flow. Missing pieces fall back to the
+// original wording, so an existing site looks identical until you edit it.
+// --------------------------------------------------------------------------
+const DEFAULT_HOME = {
+  announcement: { enabled: false, text: "", linkText: "", linkUrl: "", until: "" },
+  hero: {
+    eyebrow: "Old Harbour · St. Catherine · Jamaica",
+    headline: "Every port, cable and *machine* your office actually runs on.",
+    lead: "Kandotech stocks the parts IT techs reach for daily — adapters, patch cable, SFPs, power cords, drives, and refurbished desktops — plus the on-site services to install and support them.",
+    primaryText: "Browse the catalog",
+    primaryUrl: "catalog.html",
+    secondaryText: "See our services",
+    secondaryUrl: "services.html",
+    cards: [],
+  },
+  flyers: { title: "Flyers & promotions", intro: "", items: [] },
+  sections: [
+    {
+      id: "why-kandotech",
+      visible: true,
+      kicker: "Why Kandotech",
+      heading: "Tested before it's listed, stocked for the job in front of you.",
+      body: "Every pre-owned drive, adapter, and charger is checked working before it goes on the shelf. Based in Old Harbour, we support single offices and multi-location rollouts across Jamaica.",
+      imageUrl: "",
+      imageSide: "right",
+      button1Text: "More about us",
+      button1Url: "about.html",
+      button2Text: "Get in touch",
+      button2Url: "contact.html",
+    },
+  ],
+};
+
+function homeStr(obj, key, fallback, max) {
+  return obj && typeof obj[key] === "string" ? obj[key].slice(0, max) : fallback;
+}
+// Links: http(s), mailto, tel, or a plain relative/site path. Anything else
+// (javascript:, data:, etc.) is dropped.
+function homeLink(v) {
+  v = String(v == null ? "" : v).trim().slice(0, 500);
+  if (!v || v.startsWith("//")) return "";
+  const scheme = v.match(/^([a-z][a-z0-9+.-]*):/i);
+  if (scheme) return ["http", "https", "mailto", "tel"].includes(scheme[1].toLowerCase()) ? v : "";
+  return v;
+}
+// Images: only files uploaded through the console (assets/...) or https links.
+function homeImage(v) {
+  v = String(v == null ? "" : v).trim().slice(0, 500);
+  if (/^\/?assets\/[\w\-./%]+$/i.test(v) && !v.includes("..")) return v;
+  if (/^https:\/\/[^\s"'<>]+$/i.test(v)) return v;
+  return "";
+}
+function homeDate(v) {
+  return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : "";
+}
+function homeId(v, fallbackPrefix) {
+  const cleaned = String(v || "").replace(/[^\w-]/g, "").slice(0, 40);
+  return cleaned || `${fallbackPrefix}-${crypto.randomBytes(3).toString("hex")}`;
+}
+
+function sanitizeHome(h) {
+  h = h && typeof h === "object" ? h : {};
+  const D = DEFAULT_HOME;
+  const a = h.announcement || {};
+  const hero = h.hero || {};
+  const fl = h.flyers || {};
+
+  const cards = (Array.isArray(hero.cards) ? hero.cards : [])
+    .map((c) => ({ url: homeImage(c && c.url), tag: homeStr(c, "tag", "", 80) }))
+    .filter((c) => c.url)
+    .slice(0, 3);
+
+  const items = (Array.isArray(fl.items) ? fl.items : [])
+    .map((i) => ({
+      id: homeId(i && i.id, "flyer"),
+      url: homeImage(i && i.url),
+      caption: homeStr(i, "caption", "", 140),
+      linkUrl: homeLink(i && i.linkUrl),
+      until: homeDate(i && i.until),
+    }))
+    .filter((i) => i.url)
+    .slice(0, 24);
+
+  const rawSections = Array.isArray(h.sections) ? h.sections : D.sections;
+  const sections = rawSections.slice(0, 30).map((s) => ({
+    id: homeId(s && s.id, "sec"),
+    visible: !(s && s.visible === false),
+    kicker: homeStr(s, "kicker", "", 60),
+    heading: homeStr(s, "heading", "", 160),
+    body: homeStr(s, "body", "", 5000),
+    imageUrl: homeImage(s && s.imageUrl),
+    imageSide: s && s.imageSide === "left" ? "left" : "right",
+    button1Text: homeStr(s, "button1Text", "", 40),
+    button1Url: homeLink(s && s.button1Url),
+    button2Text: homeStr(s, "button2Text", "", 40),
+    button2Url: homeLink(s && s.button2Url),
+  }));
+
+  return {
+    announcement: {
+      enabled: !!a.enabled,
+      text: homeStr(a, "text", "", 300),
+      linkText: homeStr(a, "linkText", "", 60),
+      linkUrl: homeLink(a.linkUrl),
+      until: homeDate(a.until),
+    },
+    hero: {
+      eyebrow: homeStr(hero, "eyebrow", D.hero.eyebrow, 120),
+      headline: homeStr(hero, "headline", D.hero.headline, 200),
+      lead: homeStr(hero, "lead", D.hero.lead, 600),
+      primaryText: homeStr(hero, "primaryText", D.hero.primaryText, 40),
+      primaryUrl: homeLink(typeof hero.primaryUrl === "string" ? hero.primaryUrl : D.hero.primaryUrl),
+      secondaryText: homeStr(hero, "secondaryText", D.hero.secondaryText, 40),
+      secondaryUrl: homeLink(typeof hero.secondaryUrl === "string" ? hero.secondaryUrl : D.hero.secondaryUrl),
+      cards,
+    },
+    flyers: {
+      title: homeStr(fl, "title", D.flyers.title, 80),
+      intro: homeStr(fl, "intro", "", 300),
+      items,
+    },
+    sections,
+  };
+}
+
+// Deterministic shape: both draft and live always come out in the same key
+// order, so the console's "unpublished changes" check stays accurate.
+function withHomeDefaults(cat) {
+  cat = cat || {};
+  return {
+    products: cat.products || [],
+    categories: cat.categories || [],
+    services: cat.services || [],
+    business: cat.business || {},
+    home: sanitizeHome(cat.home),
+  };
+}
+function isAdminSession(req) {
+  const token = parseCookies(req).kandotech_admin;
+  const expiry = token && sessions.get(token);
+  return !!(expiry && expiry >= Date.now());
+}
 
 // --------------------------------------------------------------------------
 // admin auth
@@ -228,13 +379,13 @@ app.get("/api/admin/check", requireAdmin, (req, res) => res.json({ ok: true }));
 // --------------------------------------------------------------------------
 app.get("/api/admin/catalog", requireAdmin, (req, res) => {
   res.json({
-    draft: readJSON(DRAFT_PATH),
-    live: readJSON(LIVE_PATH),
+    draft: withHomeDefaults(readJSON(DRAFT_PATH)),
+    live: withHomeDefaults(readJSON(LIVE_PATH)),
   });
 });
 
 app.put("/api/admin/catalog", requireAdmin, (req, res) => {
-  const { products, categories, services, business } = req.body || {};
+  const { products, categories, services, business, home } = req.body || {};
   if (!Array.isArray(products)) {
     return res.status(400).json({ error: "products must be an array" });
   }
@@ -252,6 +403,8 @@ app.put("/api/admin/catalog", requireAdmin, (req, res) => {
     categories: categories || [],
     services: services || [],
     business: business || {},
+    // An older admin tab that doesn't know about `home` must not wipe it.
+    home: sanitizeHome(home === undefined ? readJSON(DRAFT_PATH).home : home),
   });
   res.json({ ok: true, savedAt: Date.now() });
 });
@@ -264,7 +417,7 @@ app.post("/api/admin/publish", requireAdmin, (req, res) => {
 });
 
 app.post("/api/admin/discard", requireAdmin, (req, res) => {
-  const live = readJSON(LIVE_PATH);
+  const live = withHomeDefaults(readJSON(LIVE_PATH));
   writeJSON(DRAFT_PATH, live);
   res.json({ ok: true, draft: live });
 });
