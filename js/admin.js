@@ -2,8 +2,8 @@
    KANDOTECH — admin console
    ========================================================================== */
 
-let draft = { products: [], categories: [], services: [], business: {} };
-let liveSnapshot = { products: [], categories: [], services: [], business: {} };
+let draft = { products: [], categories: [], services: [], business: {}, home: {} };
+let liveSnapshot = { products: [], categories: [], services: [], business: {}, home: {} };
 let saveTimer = null;
 let searchTerm = "";
 
@@ -15,6 +15,7 @@ async function init(){
   wireTabs();
   wirePublishBar();
   wireAddButtons();
+  wireHomeEditor();
   document.getElementById("adminSearch").addEventListener("input", e => {
     searchTerm = e.target.value.trim().toLowerCase();
     renderProducts();
@@ -96,6 +97,7 @@ async function loadAdminCatalog(){
   renderCategories();
   renderServices();
   renderBusinessForm();
+  renderHomeEditor();
   updatePublishBar();
 }
 
@@ -163,6 +165,7 @@ function wirePublishBar(){
     renderCategories();
     renderServices();
     renderBusinessForm();
+    renderHomeEditor();
     updatePublishBar();
     showAdminToast("Draft reverted to match the live site.");
   });
@@ -569,4 +572,297 @@ function showAdminToast(text){
     toast.classList.add("leaving");
     setTimeout(() => toast.remove(), 220);
   }, 3200);
+}
+
+
+/* ==========================================================================
+   Home page editor (Home page tab)
+   Scalar fields are bound by path, e.g. data-hpath="sections.2.heading",
+   and written straight into draft.home. Structural changes (add/remove/move,
+   uploads) re-render the editor; typing never does, so focus is kept.
+   ========================================================================== */
+const HOME_MAX_FLYERS = 24, HOME_MAX_SECTIONS = 30, HOME_MAX_HERO_CARDS = 3;
+
+// Escapes everything that matters inside HTML text AND attributes.
+function hx(v){
+  return String(v == null ? "" : v)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function rid(prefix){ return prefix + "-" + Math.random().toString(36).slice(2, 8); }
+
+function hField(label, path, value, o = {}){
+  const id = "hp-" + path.replace(/\./g, "-");
+  const hint = o.hint ? `<div class="hint">${hx(o.hint)}</div>` : "";
+  let input;
+  if(o.type === "textarea"){
+    input = `<textarea id="${id}" data-hpath="${path}" rows="${o.rows || 3}" maxlength="${o.max || 600}">${hx(value)}</textarea>`;
+  }else if(o.type === "select"){
+    input = `<select id="${id}" data-hpath="${path}">${o.options.map(([v, l]) => `<option value="${v}"${v === value ? " selected" : ""}>${hx(l)}</option>`).join("")}</select>`;
+  }else if(o.type === "date"){
+    input = `<input id="${id}" type="date" data-hpath="${path}" value="${hx(value)}">`;
+  }else{
+    input = `<input id="${id}" type="text" data-hpath="${path}" value="${hx(value)}" maxlength="${o.max || 200}" placeholder="${hx(o.placeholder || "")}">`;
+  }
+  return `<div class="field"><label for="${id}">${hx(label)}</label>${input}${hint}</div>`;
+}
+function hCheck(label, path, checked){
+  const id = "hp-" + path.replace(/\./g, "-");
+  return `<label class="hcheck" for="${id}"><input id="${id}" type="checkbox" data-hpath="${path}"${checked ? " checked" : ""}> <span>${hx(label)}</span></label>`;
+}
+function hUploadButton(label, kind, extra = "", multiple = true){
+  return `<label class="btn btn-ghost btn-sm hupload">${hx(label)}<input type="file" accept="image/*" ${multiple ? "multiple" : ""} hidden data-hupload="${kind}" ${extra}></label>`;
+}
+function hIconBtn(action, i, text, title, disabled){
+  return `<button type="button" class="hbtn" data-haction="${action}" data-i="${i}" title="${hx(title)}" aria-label="${hx(title)}"${disabled ? " disabled" : ""}>${text}</button>`;
+}
+
+function ensureHomeShape(){
+  if(!draft.home || typeof draft.home !== "object") draft.home = {};
+  const h = draft.home;
+  h.announcement = h.announcement || { enabled: false, text: "", linkText: "", linkUrl: "", until: "" };
+  h.hero = h.hero || {};
+  h.hero.cards = h.hero.cards || [];
+  h.flyers = h.flyers || { title: "Flyers & promotions", intro: "", items: [] };
+  h.flyers.items = h.flyers.items || [];
+  h.sections = h.sections || [];
+  return h;
+}
+
+function renderHomeEditor(){
+  const root = document.getElementById("homeEditor");
+  if(!root) return;
+  const h = ensureHomeShape();
+  const a = h.announcement, hero = h.hero, fl = h.flyers;
+
+  const heroCards = hero.cards.map((c, i) => `
+    <div class="hmedia">
+      <img src="${hx(c.url)}" alt="">
+      <input type="text" data-hpath="hero.cards.${i}.tag" value="${hx(c.tag)}" maxlength="80" placeholder="Label (optional)" aria-label="Picture ${i + 1} label">
+      ${hIconBtn("hero-card-remove", i, "Remove", "Remove this picture")}
+    </div>`).join("");
+
+  const flyerCards = fl.items.map((f, i) => `
+    <div class="hflyer">
+      <img src="${hx(f.url)}" alt="">
+      <input type="text" data-hpath="flyers.items.${i}.caption" value="${hx(f.caption)}" maxlength="140" placeholder="Caption (optional)" aria-label="Caption ${i + 1}">
+      <input type="text" data-hpath="flyers.items.${i}.linkUrl" value="${hx(f.linkUrl)}" maxlength="500" placeholder="Link (optional) e.g. catalog.html" aria-label="Link ${i + 1}">
+      <label class="hmini">Hide after <input type="date" data-hpath="flyers.items.${i}.until" value="${hx(f.until)}"></label>
+      <div class="hrow-actions">
+        ${hIconBtn("flyer-move-left", i, "←", "Move earlier", i === 0)}
+        ${hIconBtn("flyer-move-right", i, "→", "Move later", i === fl.items.length - 1)}
+        ${hIconBtn("flyer-remove", i, "Remove", "Remove this flyer")}
+      </div>
+    </div>`).join("");
+
+  const sections = h.sections.map((s, i) => `
+    <div class="hcard hsection">
+      <div class="hsection-head">
+        <strong>Section ${i + 1}</strong>
+        ${hCheck("Show on site", `sections.${i}.visible`, s.visible !== false)}
+        <span class="hrow-actions">
+          ${hIconBtn("section-move-up", i, "↑", "Move up", i === 0)}
+          ${hIconBtn("section-move-down", i, "↓", "Move down", i === h.sections.length - 1)}
+          ${hIconBtn("section-remove", i, "Delete", "Delete this section")}
+        </span>
+      </div>
+      ${hField("Small heading above the title (optional)", `sections.${i}.kicker`, s.kicker, { max: 60 })}
+      ${hField("Title", `sections.${i}.heading`, s.heading, { max: 160 })}
+      ${hField("Text", `sections.${i}.body`, s.body, { type: "textarea", rows: 5, max: 5000, hint: "Leave a blank line between paragraphs." })}
+      <div class="field">
+        <label>Picture (optional)</label>
+        ${s.imageUrl
+          ? `<div class="hsection-image"><img src="${hx(s.imageUrl)}" alt="">
+               <div class="hrow-actions">${hUploadButton("Replace", "section-image", `data-i="${i}"`, false)}${hIconBtn("section-image-remove", i, "Remove picture", "Remove picture")}</div></div>`
+          : hUploadButton("+ Add picture", "section-image", `data-i="${i}"`, false)}
+      </div>
+      ${s.imageUrl ? hField("Picture position", `sections.${i}.imageSide`, s.imageSide, { type: "select", options: [["right", "Right of the text"], ["left", "Left of the text"]] }) : ""}
+      <div class="hgrid2">
+        ${hField("Button 1 text", `sections.${i}.button1Text`, s.button1Text, { max: 40 })}
+        ${hField("Button 1 link", `sections.${i}.button1Url`, s.button1Url, { placeholder: "e.g. about.html or https://…" })}
+        ${hField("Button 2 text", `sections.${i}.button2Text`, s.button2Text, { max: 40 })}
+        ${hField("Button 2 link", `sections.${i}.button2Url`, s.button2Url, { placeholder: "e.g. contact.html" })}
+      </div>
+    </div>`).join("");
+
+  root.innerHTML = `
+    <div class="hcard">
+      <h3>Announcement bar</h3>
+      <p class="dim">A colored bar across the top of every page — holiday hours, a sale, a notice. Visitors can close it.</p>
+      ${hCheck("Show the announcement bar", "announcement.enabled", a.enabled)}
+      ${hField("Message", "announcement.text", a.text, { max: 300, placeholder: "e.g. We're closed Monday for the holiday." })}
+      <div class="hgrid2">
+        ${hField("Link text (optional)", "announcement.linkText", a.linkText, { max: 60, placeholder: "e.g. See hours" })}
+        ${hField("Link address (optional)", "announcement.linkUrl", a.linkUrl, { placeholder: "contact.html or https://…" })}
+      </div>
+      ${hField("Hide automatically after (optional)", "announcement.until", a.until, { type: "date" })}
+    </div>
+
+    <div class="hcard">
+      <h3>Top banner</h3>
+      <p class="dim">The big headline area at the top of the home page.</p>
+      ${hField("Small line above the headline", "hero.eyebrow", hero.eyebrow, { max: 120 })}
+      ${hField("Headline", "hero.headline", hero.headline, { max: 200, hint: "Put *stars* around a word to give it the colored highlight, e.g. Every port and *machine*." })}
+      ${hField("Description", "hero.lead", hero.lead, { type: "textarea", rows: 3, max: 600 })}
+      <div class="hgrid2">
+        ${hField("First button text", "hero.primaryText", hero.primaryText, { max: 40 })}
+        ${hField("First button link", "hero.primaryUrl", hero.primaryUrl, { placeholder: "catalog.html" })}
+        ${hField("Second button text", "hero.secondaryText", hero.secondaryText, { max: 40 })}
+        ${hField("Second button link", "hero.secondaryUrl", hero.secondaryUrl, { placeholder: "services.html" })}
+      </div>
+      <div class="field">
+        <label>Banner pictures (up to ${HOME_MAX_HERO_CARDS})</label>
+        <div class="hhint-line dim">The stacked pictures on the right of the banner. Leave empty to keep the default product pictures.</div>
+        <div class="hmedia-row">${heroCards}</div>
+        ${hero.cards.length < HOME_MAX_HERO_CARDS ? hUploadButton("+ Add picture", "hero-card") : ""}
+      </div>
+    </div>
+
+    <div class="hcard">
+      <h3>Flyers &amp; pictures</h3>
+      <p class="dim">Upload flyers, posters or promo pictures. Visitors can tap one to see it full size. The whole section is hidden when there are none.</p>
+      <div class="hgrid2">
+        ${hField("Section title", "flyers.title", fl.title, { max: 80 })}
+        ${hField("Short intro (optional)", "flyers.intro", fl.intro, { max: 300 })}
+      </div>
+      <div class="hflyer-grid">${flyerCards}</div>
+      ${fl.items.length < HOME_MAX_FLYERS ? hUploadButton("+ Add flyers / pictures", "flyers") : ""}
+      <div class="hhint-line dim">Tip: set a "Hide after" date on a promotion and it disappears by itself when it ends.</div>
+    </div>
+
+    <h3 class="hsections-title">Text sections</h3>
+    <p class="dim" style="margin-top:0;">Announcements, paragraphs, anything you want to say — each with an optional picture and up to two buttons. They appear below the product categories.</p>
+    ${sections}
+    ${h.sections.length < HOME_MAX_SECTIONS ? `<button type="button" class="btn btn-primary btn-sm" data-haction="section-add">+ Add a section</button>` : ""}
+  `;
+}
+
+function setPath(obj, path, value){
+  const keys = path.split(".");
+  let o = obj;
+  for(let i = 0; i < keys.length - 1; i++){
+    o = o[keys[i]];
+    if(o == null) return;
+  }
+  o[keys[keys.length - 1]] = value;
+}
+
+// Big phone photos are shrunk before upload so the home page stays fast.
+async function prepareHomeImage(file){
+  if(!/^image\/(jpeg|png|webp)$/.test(file.type)) return file;
+  const MAX_SIDE = 1800;
+  try{
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));
+    if(scale === 1 && file.size < 1.5 * 1024 * 1024){ if(bmp.close) bmp.close(); return file; }
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bmp.width * scale);
+    canvas.height = Math.round(bmp.height * scale);
+    canvas.getContext("2d").drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    if(bmp.close) bmp.close();
+    const outType = file.type === "image/png" ? "image/webp" : file.type; // webp keeps transparency
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, outType, 0.88));
+    if(!blob || blob.size >= file.size) return file;
+    const ext = blob.type === "image/webp" ? ".webp" : (blob.type === "image/png" ? ".png" : ".jpg");
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ext, { type: blob.type });
+  }catch(e){
+    return file;
+  }
+}
+
+async function uploadHomeImages(fileList){
+  const urls = [];
+  const files = Array.from(fileList || []);
+  if(!files.length) return urls;
+  showAdminToast(`Uploading ${files.length} image${files.length === 1 ? "" : "s"}…`);
+  for(const original of files){
+    try{
+      if(!original.type.startsWith("image/")) throw new Error("only pictures can go here");
+      const file = await prepareHomeImage(original);
+      const form = new FormData();
+      form.append("image", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || "upload failed");
+      urls.push(data.url);
+    }catch(e){
+      showAdminToast(`"${hx(original.name)}" failed: ${hx(e.message || "upload error")}`);
+    }
+  }
+  return urls;
+}
+
+function moveItem(list, i, delta){
+  const j = i + delta;
+  if(j < 0 || j >= list.length) return false;
+  [list[i], list[j]] = [list[j], list[i]];
+  return true;
+}
+
+async function openDraftPreview(){
+  const w = window.open("about:blank", "_blank");
+  clearTimeout(saveTimer);
+  await saveDraft();
+  if(w){ w.location.href = "index.html?preview=1"; }
+  else{ showAdminToast("Your browser blocked the preview window — allow pop-ups for this site and try again."); }
+}
+
+function wireHomeEditor(){
+  const root = document.getElementById("homeEditor");
+  if(!root) return;
+  document.getElementById("previewDraftBtn").addEventListener("click", openDraftPreview);
+
+  root.addEventListener("input", e => {
+    const t = e.target.closest("[data-hpath]");
+    if(!t) return;
+    setPath(ensureHomeShape(), t.dataset.hpath, t.type === "checkbox" ? t.checked : t.value);
+    scheduleSave();
+  });
+
+  root.addEventListener("click", e => {
+    const btn = e.target.closest("[data-haction]");
+    if(!btn || btn.disabled) return;
+    const h = ensureHomeShape();
+    const i = Number(btn.dataset.i);
+    let changed = true;
+    switch(btn.dataset.haction){
+      case "hero-card-remove": h.hero.cards.splice(i, 1); break;
+      case "flyer-remove": h.flyers.items.splice(i, 1); break;
+      case "flyer-move-left": changed = moveItem(h.flyers.items, i, -1); break;
+      case "flyer-move-right": changed = moveItem(h.flyers.items, i, +1); break;
+      case "section-move-up": changed = moveItem(h.sections, i, -1); break;
+      case "section-move-down": changed = moveItem(h.sections, i, +1); break;
+      case "section-image-remove": h.sections[i].imageUrl = ""; break;
+      case "section-remove":
+        if(!confirm("Delete this section? You can still use \"Discard draft changes\" before publishing.")) return;
+        h.sections.splice(i, 1);
+        break;
+      case "section-add":
+        h.sections.push({ id: rid("sec"), visible: true, kicker: "", heading: "New section", body: "", imageUrl: "", imageSide: "right", button1Text: "", button1Url: "", button2Text: "", button2Url: "" });
+        break;
+      default: changed = false;
+    }
+    if(changed){ renderHomeEditor(); scheduleSave(); }
+  });
+
+  root.addEventListener("change", async e => {
+    const input = e.target.closest("[data-hupload]");
+    if(!input || !input.files || !input.files.length) return;
+    const h = ensureHomeShape();
+    const kind = input.dataset.hupload;
+    const index = Number(input.dataset.i);
+    const files = Array.from(input.files);
+    input.value = "";
+    const urls = await uploadHomeImages(files);
+    if(!urls.length) return;
+    if(kind === "hero-card"){
+      urls.slice(0, HOME_MAX_HERO_CARDS - h.hero.cards.length).forEach(url => h.hero.cards.push({ url, tag: "" }));
+    }else if(kind === "flyers"){
+      urls.slice(0, HOME_MAX_FLYERS - h.flyers.items.length).forEach(url => h.flyers.items.push({ id: rid("flyer"), url, caption: "", linkUrl: "", until: "" }));
+    }else if(kind === "section-image" && h.sections[index]){
+      h.sections[index].imageUrl = urls[0];
+    }
+    renderHomeEditor();
+    scheduleSave();
+    showAdminToast("Picture added. Publish to make it live.");
+  });
 }
